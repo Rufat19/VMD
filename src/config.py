@@ -1,0 +1,111 @@
+"""
+Konfiqurasiya parametrləri və log qurğuları
+"""
+import os
+import logging
+from datetime import datetime
+import pytz
+from dotenv import load_dotenv
+import warnings
+from typing import Optional
+try:
+    # PTB 21.x xüsusi xəbərdarlıq tipi
+    from telegram.warnings import PTBUserWarning  # type: ignore
+except Exception:
+    PTBUserWarning = Warning  # fallback
+
+load_dotenv()
+
+logger = logging.getLogger("dsmf-config")
+
+def setup_logging(level: Optional[str] = None):
+    """Mərkəzi log konfiqurasiyası.
+
+    Ətraf mühit dəyişənləri:
+      - LOG_LEVEL: DEBUG|INFO|WARNING|ERROR (default: INFO)
+      - LOG_HTTP: 0/1 (httpx və Telegram HTTP sorğularını göstər) (default: 0)
+      - SUPPRESS_PTB_WARN: 0/1 (PTBUserWarning xəbərdarlıqlarını gizlət) (default: 1)
+    """
+    lvl = (level or os.getenv("LOG_LEVEL", "INFO")).upper()
+    logging.basicConfig(
+        level=getattr(logging, lvl, logging.INFO),
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%H:%M:%S",
+        force=True,
+    )
+
+    # Səs-küylü logları susdur
+    show_http = os.getenv("LOG_HTTP", "0").lower() in ("1", "true", "yes")
+    if not show_http:
+        for noisy in ("httpx", "telegram.request", "telegram.bot", "telegram.ext._application"):
+            logging.getLogger(noisy).setLevel(logging.WARNING)
+    # PTB per_message xəbərdarlıqlarını gizlət (istəyə bağlı)
+    if os.getenv("SUPPRESS_PTB_WARN", "1").lower() in ("1", "true", "yes"):
+        try:
+            warnings.filterwarnings("ignore", category=PTBUserWarning)  # type: ignore[arg-type]
+        except Exception:
+            pass
+
+# Timezone - Bakı vaxtı
+BAKU_TZ = pytz.timezone('Asia/Baku')
+
+# Bot parametrləri
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+EXECUTOR_CHAT_ID = int(os.getenv("EXECUTOR_CHAT_ID", "0"))
+LANG = os.getenv("LANG", "az")
+ADMIN_USER_IDS = {6520873307}  # Rate limit-dən azad administrator(lar)
+
+# Database
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/dsmf_bot")
+
+# Validasiya
+if not BOT_TOKEN or BOT_TOKEN == "your_bot_token_here":
+    raise ValueError(
+        "BOT_TOKEN təyin edilməyib. .env faylında BotFather-dən aldığınız tokeni yazın."
+    )
+
+if EXECUTOR_CHAT_ID == 0 or EXECUTOR_CHAT_ID == -1001234567890:
+    logger.warning("EXECUTOR_CHAT_ID default dəyərdədir. Real chat ID yazın.")
+
+# Anket məhdudiyyətləri
+MIN_NAME_LENGTH = 2
+MIN_SUBJECT_LENGTH = 5
+MAX_SUBJECT_LENGTH = 150  # Beynəlxalq standart (email subject kimi)
+MIN_BODY_LENGTH = 10
+MAX_BODY_LENGTH = 1000    # Orta müraciət üçün optimal
+FIN_LENGTH = 7
+
+# Rate limiting - Spam qarşısı
+MAX_DAILY_SUBMISSIONS = 3  # İstifadəçi 24 saatda max 3 müraciət göndərə bilər
+
+# Blacklist qaydası - çox sayda imtina olunan müraciətlər
+BLACKLIST_REJECTION_THRESHOLD = 5  # Son pəncərədə bu qədər imtina olarsa
+BLACKLIST_WINDOW_DAYS = 30         # bu qədər gün ərzində
+
+# Mətnlər (Azərbaycan dili)
+MESSAGES = {
+    "welcome": (
+        "🏛 DSMF Müraciət Botuna xoş gəldiniz.\n\n"
+        "Başlamaq üçün ad, soyad, ata adınızı yazın.\n"
+        "Sonrakı addımlarda telefon, FIN, şəxsiyyət vəsiqəsinin fotosu, mövzu və mətn soruşulacaq."
+    ),
+    "fullname_error": "Zəhmət olmasa ad və soyadı daxil edin (ata adı da ola bilər).",
+    "phone_prompt": "📱 Mobil nömrənizi daxil edin.\nMəsələn: +994501234567",
+    "phone_error": "Nömrə düzgün formatda deyil. Məsələn: +994501234567",
+    "fin_prompt": "🆔 Şəxsiyyət vəsiqənizin FIN kodunu daxil edin (7 simvol).",
+    "fin_error": "FIN 7 simvoldan ibarət olmalıdır (latın hərf/rəqəm).",
+    "id_photo_prompt": "📸 Şəxsiyyət vəsiqənizin ön tərəfinin şəklini göndərin (foto kimi).",
+    "id_photo_error": "Zəhmət olmasa foto göndərin.",
+    "form_type_prompt": "📋 Müraciət növünü seçin:",
+    "subject_prompt": "📝 Müraciətin mövzusunu yazın (max 150 simvol).",
+    "subject_error": "Mövzu çox qısadır (min 5 simvol) və ya çox uzundur (max 150 simvol).",
+    "body_prompt": "✍️ Müraciət mətnini ətraflı yazın (max 1000 simvol).",
+    "body_error": "Mətn çox qısadır (min 10 simvol) və ya çox uzundur (max 1000 simvol).",
+    "confirm_sent": "✅ Müraciət təsdiqləndi və icraçılara göndərilir…",
+    "success": "✅ Müraciətiniz qeydə alındı. Təşəkkürlər!",
+    "cancelled": "❌ Müraciət ləğv edildi.",
+    "help": "ℹ️ /start ilə yeni müraciət göndərə bilərsiniz.\n/chatid ilə bu qrup/kanalın ID-ni görə bilərsiniz.",
+    "unknown": "⚠️ Anlaşılmadı. /start yazın.",
+}
+
+logger.info(f"Konfiqurasiya yükləndi: {LANG.upper()}")

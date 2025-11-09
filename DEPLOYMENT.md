@@ -1,0 +1,137 @@
+# 🚂 Railway Deployment Təlimatı
+
+## Ön Hazırlıq
+
+### 1. GitHub Repository
+Əvvəlcə kodu GitHub-a push etməlisiniz:
+
+```bash
+# Git inicializasiya (əgər edilməyibsə)
+git init
+
+# Bütün faylları əlavə et
+git add .
+
+# Commit
+git commit -m "DSMF bot - initial deployment"
+
+# Remote əlavə et
+git branch -M main
+git remote add origin https://github.com/Rufat19/sosial_instrucctor.git
+
+# Push
+git push -u origin main
+```
+
+## Railway-də Deploy
+
+### 2. Railway Proyekti Yarat
+
+1. [Railway.app](https://railway.app) saytına daxil olun
+2. GitHub hesabınızla qoşulun
+3. **"New Project"** düyməsinə klikləyin
+4. **"Deploy from GitHub repo"** seçin
+5. `Rufat19/sosial_instrucctor` repository-ni seçin
+6. Railway avtomatik build başlayacaq
+
+### 3. Environment Variables Təyin Et
+
+Railway dashboard-da proyektinizi açın və **"Variables"** tab-ına keçin.
+
+Aşağıdakı dəyişənləri əlavə edin:
+
+| Variable Name | Value | Qeyd |
+|--------------|-------|------|
+| `BOT_TOKEN` | `8143144208:AAEU6TZEtF8At6g3jM_94vLjBJi_pVffMZM` | BotFather-dən alınan token |
+| `EXECUTOR_CHAT_ID` | `-4965197205` | İcraçıların qrup ID-si |
+| `LANG` | `az` | Dil (Azərbaycan) |
+
+**Vacib:** `DATABASE_URL` Railway tərəfindən avtomatik təyin olunur (PostgreSQL əlavə etdikdə).
+
+### 3.5. PostgreSQL Əlavə Et
+
+1. Railway dashboard-da proyektinizə qayıdın
+2. **"+ New"** düyməsinə klik edin
+3. **"Database"** → **"Add PostgreSQL"** seçin
+4. Railway avtomatik PostgreSQL yaradıb `DATABASE_URL` təyin edəcək
+5. Bot avtomatik database cədvəllərini yaradacaq
+
+**Qeyd:** PostgreSQL pulsuz planda 512MB yaddaş verir.
+
+### 4. Deployment Yoxlayın
+
+**Logs tab-ında** bot işə başladığını görəcəksiniz:
+```
+✅ Database modulu yükləndi
+✅ Database cədvəlləri yaradıldı/yoxlandı
+✅ Database hazırdır
+🚀 DSMF Bot işə başlayır... (Bakı vaxtı)
+⏰ Start time: 09.11.2025 15:30:45
+Bot işə başlayır...
+```
+
+Müraciət gələndə:
+```
+✅ DB-yə yazıldı: Application ID=1
+```
+
+## Railway Konfiqurasiya Faylları
+
+Proyektdə aşağıdakı fayllar Railway üçün hazırlanıb:
+
+- **`Procfile`** - Railway-ə necə işə salmağı göstərir
+- **`runtime.txt`** - Python 3.12.0 versiyasını təyin edir
+- **`railway.json`** - Deploy konfiqurasiyası
+- **`requirements.txt`** - Python paketləri
+
+## Dəyişiklik Etdikdə
+
+Kod dəyişikliyi etdikdə:
+
+```bash
+git add .
+git commit -m "Bot yenilənməsi"
+git push
+```
+
+Railway **avtomatik** yenidən deploy edəcək.
+
+## Troubleshooting
+
+### Bot işləmir?
+
+1. **Logs yoxlayın:**
+   - Railway dashboard → Deployments → View Logs
+
+2. **Environment variables düzgündür?**
+   - Variables tab-ında yoxlayın
+
+3. **Token aktivdir?**
+   - BotFather-də botu yoxlayın: `/mybots` → bot seç → API Token
+
+### Restart lazımdır?
+
+Railway dashboard-da **"Restart"** düyməsinə klikləyin.
+
+## Bot Komandaları
+
+Deploy-dan sonra botunuzu test edin:
+
+- `/start` - Yeni müraciət başlat
+- `/help` - Yardım
+- `/chatid` - Chat ID-ni öyrən (admin üçün)
+
+## Qiymətləndirmə
+
+Railway **pulsuz plan** ilə:
+- 500 saat/ay (24/7 üçün kifayətdir)
+- Avtomatik deploy
+- HTTPS dəstəyi
+- Log monitoring
+
+## Dəstək
+
+Problemlə qarşılaşsanız:
+1. Railway logs-u yoxlayın
+2. GitHub issues yaradın
+3. Botun BotFather-də statusunu yoxlayın

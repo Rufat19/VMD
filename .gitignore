@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Database
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# VS Code
+.vscode/
+
+# Railway local
+.railway/
+
+# OS
+.DS_Store
+Thumbs.db
