@@ -70,7 +70,11 @@ def save_application(
         db.add(app)
         db.flush()
         db.refresh(app)
-        logger.info(f"✅ Müraciət database-ə yazıldı: ID={app.id}, FIN={app.fin}")
+        # Session bağlanmazdan əvvəl id-ni əldə edək
+        app_id = app.id
+        logger.info(f"✅ Müraciət database-ə yazıldı: ID={app_id}, FIN={app.fin}")
+        # Session-dan ayrılmış obyekt qaytaraq
+        db.expunge(app)
         return app
 
 def get_application_by_id(app_id: int) -> Application:
