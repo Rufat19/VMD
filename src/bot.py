@@ -929,7 +929,15 @@ def build_app() -> Application:
         fallbacks=[CommandHandler("help", help_cmd)],
         allow_reentry=True,
     )
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = (
+        ApplicationBuilder()
+        .token(BOT_TOKEN)
+        .connect_timeout(30.0)
+        .read_timeout(30.0)
+        .write_timeout(30.0)
+        .pool_timeout(30.0)
+        .build()
+    )
     app.add_handler(conv)
     # İcraçı qrupunda cavab/imtina üçün mini dialoqlar
     exec_conv_reply = ConversationHandler(
