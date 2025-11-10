@@ -563,7 +563,7 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
             await context.bot.send_message(chat_id=app.user_telegram_id, text=f"✅ Müraciətinizə cavab:\n\n{text}")  # type: ignore[arg-type]
-            update_application_status(app_id, ApplicationStatus.COMPLETED, notes=f"Replied by @{from_user.username or from_user.id}")
+            update_application_status(app_id, ApplicationStatus.COMPLETED, notes=f"Replied by @{from_user.username or from_user.id}", reply_text=text)
         
         # Qrup mesajında statusu yenilə
         if exec_msg_id and exec_chat_id:
@@ -627,7 +627,7 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
             await context.bot.send_message(chat_id=app.user_telegram_id, text=f"❌ Müraciət rədd edildi. Səbəb:\n\n{reason}")  # type: ignore[arg-type]
-            update_application_status(app_id, ApplicationStatus.REJECTED, notes=f"Rejected by @{from_user.username or from_user.id}: {reason}")
+            update_application_status(app_id, ApplicationStatus.REJECTED, notes=f"Rejected by @{from_user.username or from_user.id}: {reason}", reply_text=reason)
         
         # Qrup mesajında statusu yenilə
         if exec_msg_id and exec_chat_id:

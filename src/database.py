@@ -62,6 +62,7 @@ class Application(Base):
     # Status və qeydlər
     status = Column(SQLEnum(ApplicationStatus), default=ApplicationStatus.PENDING, nullable=False, index=True)
     notes = Column(Text, nullable=True)  # Admin qeydləri
+    reply_text = Column(Text, nullable=True)  # İcraçının cavab mətnı
     
     # Timestamps (Bakı vaxtı)
     created_at = Column(DateTime, nullable=False, index=True)
@@ -84,6 +85,7 @@ class Application(Base):
             "body": self.body,
             "status": self.status.value,
             "notes": self.notes,
+            "reply_text": self.reply_text,
             "created_at": self.created_at.isoformat() if self.created_at is not None else None,  # type: ignore[union-attr]
             "updated_at": self.updated_at.isoformat() if self.updated_at is not None else None,  # type: ignore[union-attr]
         }

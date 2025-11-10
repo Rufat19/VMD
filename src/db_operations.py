@@ -105,7 +105,7 @@ def get_applications_by_status(status: ApplicationStatus) -> list[Application]:
             db.expunge(app)
         return apps
 
-def update_application_status(app_id: int, status: ApplicationStatus, notes: Optional[str] = None):
+def update_application_status(app_id: int, status: ApplicationStatus, notes: Optional[str] = None, reply_text: Optional[str] = None):
     """Müraciət statusunu yenilə"""
     with get_db() as db:
         app = db.query(Application).filter(Application.id == app_id).first()
@@ -113,6 +113,8 @@ def update_application_status(app_id: int, status: ApplicationStatus, notes: Opt
             app.status = status  # type: ignore[assignment]
             if notes:
                 app.notes = notes  # type: ignore[assignment]
+            if reply_text:
+                app.reply_text = reply_text  # type: ignore[assignment]
             db.commit()
             logger.info(f"✅ Müraciət {app_id} statusu yeniləndi: {status.value}")
             return app
@@ -197,7 +199,7 @@ def export_to_csv(limit: int = 1000) -> str:
     # Header sətri
     writer.writerow([
         "ID", "Full Name", "Phone", "FIN", "Form Type", 
-        "Subject", "Body", "Status", "Created Date", "Updated Date"
+        "Subject", "Body", "Status", "Reply", "Created Date", "Updated Date"
     ])
     
     # Məlumatları yaz
@@ -219,6 +221,7 @@ def export_to_csv(limit: int = 1000) -> str:
                 app.subject or "",
                 app.body or "",
                 status_text,
+                app.reply_text or "",
                 created_str,
                 updated_str,
             ])
