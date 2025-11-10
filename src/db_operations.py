@@ -172,3 +172,44 @@ def count_user_recent_applications(user_telegram_id: int, hours: int = 24) -> in
             Application.user_telegram_id == user_telegram_id,
             Application.created_at >= cutoff_time
         ).count()
+
+def export_to_csv(limit: int = 1000) -> str:
+    """PostgreSQL-dən bütün müraciətləri CSV formatına çevir"""
+    import csv
+    import io
+    from datetime import datetime
+    
+    csv_buffer = io.StringIO()
+    writer = csv.writer(csv_buffer)
+    
+    # Header sətri
+    writer.writerow([
+        "ID", "Tam Ad", "Telefon", "FIN", "Müraciət Tipi", 
+        "Mövzu", "Məzmun", "Status", "Yaradılma Tarixi", "Yenilənmə Tarixi"
+    ])
+    
+    # Məlumatları yaz
+    with get_db() as db:
+        apps = db.query(Application).order_by(Application.created_at.desc()).limit(limit).all()
+        for app in apps:
+            form_type = "Şikayət" if app.form_type == FormTypeDB.COMPLAINT else "Təklif"
+            status_text = app.status.value if app.status is not None else "Naməlum"
+            created_str = app.created_at.strftime("%d.%m.%Y %H:%M:%S") if app.created_at is not None else ""
+            updated_str = app.updated_at.strftime("%d.%m.%Y %H:%M:%S") if app.updated_at is not None else ""
+            
+            writer.writerow([
+                app.id,
+                app.fullname or "",
+                app.phone or "",
+                app.fin or "",
+                form_type,
+                app.subject or "",
+                app.body or "",
+                status_text,
+                created_str,
+                updated_str,
+            ])
+    
+    csv_content = csv_buffer.getvalue()
+    csv_buffer.close()
+    return csv_content

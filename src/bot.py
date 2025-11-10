@@ -754,19 +754,46 @@ async def chatid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.effective_message.reply_text(f"Chat ID: {chat.id}")
 
 async def export_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """JSON export (yalnız SQLite üçün)"""
-    if not DB_ENABLED or not USE_SQLITE:
+    """CSV export - PostgreSQL və SQLite hər ikisində işləyir"""
+    if not DB_ENABLED:
         if update.effective_message:
-            await update.effective_message.reply_text("⚠️ Export yalnız SQLite modunda mövcuddur.")
+            await update.effective_message.reply_text("⚠️ Database deaktiv, export mümkün deyil.")
         return
     
     try:
-        from db_sqlite import export_to_json as sqlite_export_json  # type: ignore[misc]
-        output_file = sqlite_export_json()
-        if update.effective_message:
-            await update.effective_message.reply_text(f"✅ Export hazırdır: {output_file}")
+        csv_content = None
+        
+        if USE_SQLITE:
+            # SQLite JSON export
+            from db_sqlite import export_to_json as sqlite_export_json  # type: ignore[misc]
+            output_file = sqlite_export_json()
+            if update.effective_message:
+                await update.effective_message.reply_text(f"✅ Export hazırdır: {output_file}")
+            return
+        else:
+            # PostgreSQL CSV export
+            from db_operations import export_to_csv  # type: ignore[misc]
+            csv_content = export_to_csv()
+        
+        if csv_content:
+            # CSV-ni fayl olaraq göndər
+            import io
+            csv_file = io.BytesIO(csv_content.encode('utf-8'))
+            csv_file.name = "applications.csv"
+            
+            if update.effective_message:
+                await update.effective_message.reply_document(
+                    document=csv_file,
+                    filename="applications.csv",
+                    caption="📊 Müraciətlər CSV export (PostgreSQL)"
+                )
+                user_id = update.effective_user.id if update.effective_user else "unknown"
+                logger.info(f"✅ CSV export göndərildi. User: {user_id}")
+        else:
+            if update.effective_message:
+                await update.effective_message.reply_text("⚠️ Export ediləcək məlumat yoxdur.")
     except Exception as e:
-        logger.error(f"Export error: {e}")
+        logger.error(f"Export error: {e}", exc_info=True)
         if update.effective_message:
             await update.effective_message.reply_text(f"❌ Export xətası: {e}")
 
