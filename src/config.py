@@ -53,7 +53,11 @@ BAKU_TZ = pytz.timezone('Asia/Baku')
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 EXECUTOR_CHAT_ID = int(os.getenv("EXECUTOR_CHAT_ID", "0"))
 LANG = os.getenv("LANG", "az")
-ADMIN_USER_IDS = {6520873307}  # Rate limit-dən azad administrator(lar)
+
+# Admin istifadəçiləri (vergüllə ayrılmış ID-lər)
+# Nümunə: ADMIN_USER_IDS=123456789,987654321
+admin_ids_str = os.getenv("ADMIN_USER_IDS", "6520873307")
+ADMIN_USER_IDS = {int(uid.strip()) for uid in admin_ids_str.split(",") if uid.strip()}
 
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/dsmf_bot")

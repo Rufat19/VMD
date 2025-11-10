@@ -83,6 +83,31 @@ $env:FORCE_SQLITE="1"
 .\.venv\Scripts\python.exe .\src\bot.py
 ```
 
+## 🔐 Admin Konfigürasyonu
+
+**Admin komandalar:**
+- `/blacklist` - Qara siyahıyı göstər
+- `/ban <user_id> [səbəb]` - İstifadəçini qara siyahıya əlavə et
+- `/unban <user_id>` - Qara siyahıdan çıxart
+- `/clearall` - ⚠️ Bütün müraciətləri sil (test məlumatları üçün)
+- `/export` - Müraciətləri CSV-ə export et (PostgreSQL)
+
+**Admin istifadəçiləri qorunmuşdur:**
+- Yalnız `.env` faylında `ADMIN_USER_IDS`-ə daxil olan istifadəçilər bu komandaları istifadə edə bilərlər
+- Hər kəs `/clearall` yazsalar belə, ancaq admin-lər tətbiq edə bilərlər
+
+**Admin əlavə etmə:**
+1. `.env` faylını açın
+2. `ADMIN_USER_IDS` dəyərini dəyişin (vergüllə ayrılmış ID-lər):
+   ```bash
+   ADMIN_USER_IDS=123456789,987654321
+   ```
+3. Botu yenidən başladın
+
+**Istifadəçinin ID-sini necə tapmaq olar:**
+1. Istifadəçini bota write et
+2. Bot `/start` cavabında user ID-ni göstərəcəyi
+
 ## 🆔 Chat ID necə tapılır?
 
 1. BotFather-dən bot yaradın və tokenini alın
