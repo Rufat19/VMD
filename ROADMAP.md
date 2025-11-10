@@ -5,26 +5,29 @@ High-level plan for future evolution of the DSMF Citizen Appeal Bot.
 ## Vision
 Provide a reliable, auditable, multilingual platform for collecting citizen appeals, routing them to appropriate staff, tracking lifecycle state, and closing the feedback loop with timely responses.
 
-## Current Release (0.4.0) - COMPLETED ✅
-### Completed Features
-- ✅ (Prev) Real-time status system (🟡/🔴/🟢/⚫)
-- ✅ Processing inline status (📝 İşləyir) button
-- ✅ SLA reminder daily job (pending >3 days summary)
-- ✅ Rate limiting (24h max 3 appeals per user; admin exempt)
-- ✅ Auto-blacklist (≥5 rejections / 30 days) + admin management commands
-- ✅ Blacklist admin commands: /blacklist /ban /unban
-- ✅ Improved welcome message (steps, status flow, privacy, response time)
-- ✅ Type safety and Column truthiness fixes
+## Current Release (0.4.1) - Railway Production Fixes ✅
+### Completed Features (2025-11-09)
+- ✅ PostgreSQL authentication via Railway PUBLIC proxy URL (maglev.proxy.rlwy.net)
+- ✅ SQLAlchemy session detach fix for production stability
+- ✅ Telegram API timeout extensions (30s) for Railway latency
+- ✅ Polling conflict mitigation with drop_pending_updates
+- ✅ Global async error handler for cleaner logging
+- ✅ `.env.example` updated with PostgreSQL Railway template
+
+### Known Issues / Workarounds
+- Polling "Conflict" errors may persist if token is used in multiple deployments → rotate BOT_TOKEN in BotFather
+- Ensure Railway: 1 active replica, stopped old deployments
 
 ## Near-Term (Planned for 0.5.0)
 ### Priority Features
-- ⏳ PostgreSQL prod hardening (connection pooling, retry backoff)
+- ⏳ **Webhook mode** (alternative to polling for zero-conflict guarantee)
+- ⏳ **Connection pooling** (PostgreSQL production hardening, retry backoff)
 - ⏳ Admin statistics `/stats` (total, by status, avg response time, overdue count)
 - ⏳ Search `/search` (FIN, phone, ID, keyword in subject/body)
 - ⏳ Application editing before final confirmation
 - ⏳ Phone normalization & duplicate detection
-- ⏳ Central error handler + JSON structured logging
 - ⏳ Unit test coverage for conversation + executor flows
+- ⏳ Health check endpoint `/health` for monitoring
 
 ## Mid-Term (0.6.0 and Beyond)
 ### Advanced Features
@@ -42,12 +45,14 @@ Provide a reliable, auditable, multilingual platform for collecting citizen appe
 - [ ] Integration with external CRM / ticketing system.
 - [ ] Encrypted at-rest storage of sensitive PII (phone, FIN) with key rotation.
 - [ ] OAuth-based staff identity mapping for multi-system audit trails.
+- [ ] Load balancing & auto-scaling for high volume deployments
 
 ## Quality & Operations
 ### Infrastructure Improvements
 - Add test suite (pytest) for conversation flow state transitions.
 - CI pipeline (GitHub Actions) for linting, tests, Docker image build.
 - Security review: secret scanning, dependency vulnerability audit.
+- Monitoring dashboards (CPU, memory, database latency)
 - Observability: structured logs, metrics counters (appeals_created, replies_sent).
 
 ## Versioning Strategy

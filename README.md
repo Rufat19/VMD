@@ -1,6 +1,6 @@
 # DSMF Vətəndaş Müraciət Botu  
-**Versiya:** 0.4.0  
-**Son yeniləmə:** 2025-11-09
+Versiya:** 0.4.1  
+**Son yeniləmə:** 2025-11-10
 
 Bu layihə vətəndaşlardan mərhələli anket ilə məlumat toplayıb icraçı qrupuna yönləndirir, qrupdakı əməkdaşların inline düymələrlə cavab / imtina etməsinə imkan verir və cavabı vətəndaşa DM ilə çatdırır. Qrup mesajlarında real-time status göstəricisi mövcuddur.
 
@@ -164,7 +164,64 @@ Railway avtomatik yenidən deploy edəcək.
 
 ---
 
-## 🗄️ Database (PostgreSQL / SQLite Fallback)
+## � Railway Deployment & Database Setup (v0.4.1)
+
+### Automatic PostgreSQL Integration
+When you deploy to Railway with both `sosial_agent` and `Postgres` services:
+
+1. **Railway generates DATABASE_URL automatically**
+   - Format: `postgresql://user:password@host:port/database`
+   - Bot connects via Railway's public proxy (not internal hostname)
+
+2. **Environment Variable Configuration in Railway:**
+   - Go to `sosial_agent` service → **Variables** tab
+   - Add/update these variables:
+     - `BOT_TOKEN` - Telegram bot token from @BotFather
+     - `EXECUTOR_CHAT_ID` - Group/channel ID (use `/chatid` command)
+     - `LANG` - Set to `az`
+     - `DATABASE_URL` - Use **Variable Reference**: `${{Postgres.DATABASE_URL}}`
+
+3. **Fallback to SQLite**
+   - If PostgreSQL is unavailable, bot automatically switches to SQLite
+   - Set `FORCE_SQLITE=1` to force SQLite mode locally
+
+### Troubleshooting Railway Deployment (v0.4.1 fixes)
+
+#### PostgreSQL Connection Issues
+**Problem:** `FATAL: password authentication failed for user "postgres"`
+
+**Solutions:**
+1. Ensure `DATABASE_URL` uses Railway's **public proxy** URL (not internal hostname)
+2. Use Variable Reference in Railway (`${{Postgres.DATABASE_URL}}`) instead of manual URL
+3. Check Railway → Postgres service → **Connect** tab for correct public connection string
+
+#### Polling Conflicts
+**Problem:** "Conflict: terminated by other getUpdates request"
+
+**Solutions:**
+1. **Check Railway settings:**
+   - Settings → Scaling: ensure `replicas = 1`
+   - Stop/remove old deployments, keep only latest
+
+2. **Rotate bot token:**
+   - Message @BotFather: `/token`
+   - Generate new token and update `BOT_TOKEN` in Railway
+   - Redeploy
+
+3. **Already mitigated in 0.4.1:**
+   - `drop_pending_updates=True` in polling (clears stale requests)
+   - Extended timeouts (30s) for network stability
+   - Global error handler for cleaner diagnostics
+
+#### Database Issues
+**Fixed in 0.4.1:**
+- ✅ SQLAlchemy session detach (no more "Instance not bound to Session")
+- ✅ Telegram API timeout extended to 30s
+- ✅ Async error handler for better logging
+
+---
+
+## �🗄️ Database (PostgreSQL / SQLite Fallback)
 
 Bot bütün müraciətləri PostgreSQL database-də saxlayır. PostgreSQL əlçatan olmadıqda avtomatik SQLite fallback aktivləşir.
 
@@ -184,7 +241,7 @@ Versiyalar və dəyişiklik tarixi üçün [CHANGELOG.md](CHANGELOG.md), gələc
 
 ### Railway-də:
 1. PostgreSQL avtomatik əlavə olunur
-2. `DATABASE_URL` avtomatik təyin olunur
+2. `DATABASE_URL` avtomatik təyin olunur (Variable Reference ilə)
 3. Bot başlayanda cədvəllər yaranır
 4. Əgər PostgreSQL problemi olarsa, SQLite aktivləşir
 

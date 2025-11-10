@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2025-11-09 (Railway Production Fixes)
+### Fixed
+- **PostgreSQL authentication**: Corrected DATABASE_URL format to use Railway's PUBLIC proxy URL (`maglev.proxy.rlwy.net:56367`) instead of internal hostname. Variable reference (`${{Postgres.DATABASE_URL}}`) now properly configured in Railway.
+- **SQLAlchemy session detach**: Fixed "Instance not bound to Session" error by detaching `Application` object from session context in `save_application()` before returning (added `db.expunge(app)`).
+- **Telegram API timeout**: Extended connection/read/write/pool timeouts from default 5s to 30s to handle Railway network latency. Configured in `ApplicationBuilder`.
+- **Polling conflict mitigation**: Added `drop_pending_updates=True` in `run_polling()` to discard pending requests from previous instances, reducing "terminated by other getUpdates" conflicts.
+- **Global error handler**: Added async error handler to catch and log PTB internal errors cleanly with user/chat context.
+
+### Changed
+- `.env.example` updated with PostgreSQL Railway template and DATABASE_URL reference syntax.
+- `db_operations.py` improved for production session handling.
+
+### Notes
+- If "Conflict: terminated by other getUpdates request" persists, rotate BOT_TOKEN in BotFather and update Railway variables.
+- Ensure Railway deployment has only 1 active replica and previous deployments are stopped.
+
 ## [0.4.0] - 2025-11-09
 ### Added
 - **Processing status**: New inline button 📝 İşləyir to mark application as being actively handled.
