@@ -277,3 +277,13 @@ def count_user_recent_applications_sqlite(user_telegram_id: int, hours: int = 24
         )
         result = cursor.fetchone()
         return result["count"] if result else 0
+
+def delete_all_applications_sqlite() -> int:
+    """Bütün müraciətləri silinə billər (test məlumatları üçün)"""
+    with get_sqlite_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM applications")
+        conn.commit()
+        deleted = cursor.rowcount
+        logger.info(f"✅ {deleted} müraciət silindi")
+        return deleted

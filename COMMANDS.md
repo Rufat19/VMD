@@ -23,6 +23,7 @@ Tam istifadəçi və admin komanda siyahısı.
 | /blacklist | Qara siyahıda olan istifadəçilərin siyahısını göstərir |
 | /ban <user_id> [səbəb] | İstifadəçini qara siyahıya əlavə edir |
 | /unban <user_id> | Qara siyahıdan çıxarır |
+| /clearall | ⚠️ **Bütün müraciətləri sil** (test məlumatları üçün, geri çevrilə bilməz) |
 
 ## Avtomatik Mexanizmlər
 | Mexanizm | Şərh |

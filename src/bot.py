@@ -894,6 +894,59 @@ async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"/unban xətası: {e}")
         await update.effective_message.reply_text("❌ Xəta baş verdi")
 
+async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """⚠️ Bütün müraciətləri sil (test məlumatları üçün)"""
+    if not update.effective_user or not update.effective_message:
+        return
+    uid = update.effective_user.id
+    if not _is_admin(uid):
+        await update.effective_message.reply_text("❌ İcazə yoxdur")
+        return
+    try:
+        # Təsdiq xahişi
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("✅ Bəli, sil", callback_data="confirm_clearall"),
+                InlineKeyboardButton("❌ Xeyr", callback_data="cancel_clearall")
+            ]
+        ])
+        await update.effective_message.reply_text(
+            "⚠️ **Xəbərdarlıq:** Bütün müraciətlər SİLİNƏCƏK!\n\n"
+            "Bu əməliyyat geri çevrilə bilməz. Dəvam etmək istəyirsiniz?",
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        logger.error(f"/clearall xətası: {e}")
+        await update.effective_message.reply_text("❌ Xəta baş verdi")
+
+async def confirm_clearall_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Müraciətlərin silinməsini təsdiq et"""
+    query = update.callback_query
+    if not query:
+        return
+    if not query.from_user or not _is_admin(query.from_user.id):
+        await query.answer("❌ İcazə yoxdur", show_alert=True)
+        return
+    try:
+        if USE_SQLITE:
+            from db_sqlite import delete_all_applications_sqlite
+            count = delete_all_applications_sqlite()
+        else:
+            from db_operations import delete_all_applications
+            count = delete_all_applications()
+        await query.answer()
+        await query.edit_message_text(f"✅ {count} müraciət silindi!")
+    except Exception as e:
+        logger.error(f"Clearall xətası: {e}")
+        await query.answer("❌ Xəta baş verdi", show_alert=True)
+
+async def cancel_clearall_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Silinməni ləğv et"""
+    query = update.callback_query
+    if query:
+        await query.answer()
+        await query.edit_message_text("❌ Ləğv edildi")
 
 def build_app() -> Application:
     if not BOT_TOKEN:
@@ -951,6 +1004,10 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("blacklist", blacklist_cmd))
     app.add_handler(CommandHandler("ban", ban_cmd))
     app.add_handler(CommandHandler("unban", unban_cmd))
+    app.add_handler(CommandHandler("clearall", clearall_cmd))
+    # Clearall callback handlers
+    app.add_handler(CallbackQueryHandler(confirm_clearall_callback, pattern=r"^confirm_clearall$"))
+    app.add_handler(CallbackQueryHandler(cancel_clearall_callback, pattern=r"^cancel_clearall$"))
     # Kanal postu aşkarlandıqda məlumat verən sadə universal handler
     async def on_any_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if update.channel_post and update.effective_chat:

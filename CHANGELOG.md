@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.2] - 2025-11-10 (PostgreSQL CSV Export + Session Fixes)
+## [0.4.2] - 2025-11-10 (PostgreSQL CSV Export + Session Fixes + Test Data Cleanup)
 ### Added
 - **PostgreSQL CSV export**: `/export` command now generates CSV file for appeals in PostgreSQL database, with proper English column headers (ID, Full Name, Phone, FIN, Form Type, Subject, Body, Status, Created Date, Updated Date).
 - **Management reporting**: CSV format enables direct Excel import for pivot tables, statistics, and trend analysis.
 - **Timezone-aware timestamps**: All exported dates use dd.mm.yyyy HH:MM:SS format with Bakı timezone (Asia/Baku).
+- **Test data cleanup**: `/clearall` admin command to delete all applications from database (useful for clearing test data during development).
 
 ### Changed
 - `/export` command now returns CSV for PostgreSQL (instead of only JSON for SQLite fallback). SQLite mode still uses JSON format.
