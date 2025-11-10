@@ -3,7 +3,7 @@ Database əlaqə və əməliyyatlar
 """
 import os
 from contextlib import contextmanager
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator, Optional
 from database import Base, Application, ApplicationStatus, FormTypeDB, BlacklistedUser
@@ -16,11 +16,35 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/
 engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+def _run_migrations():
+    """Run pending database migrations"""
+    try:
+        with engine.connect() as conn:
+            # Check if reply_text column exists
+            result = conn.execute(text("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name='applications' AND column_name='reply_text'
+            """))
+            
+            if not result.fetchone():
+                # Add the missing column
+                logger.info("🔧 Adding reply_text column to applications table...")
+                conn.execute(text("""
+                    ALTER TABLE applications 
+                    ADD COLUMN reply_text TEXT NULL
+                """))
+                conn.commit()
+                logger.info("✅ reply_text column added")
+    except Exception as e:
+        logger.warning(f"⚠️ Migration check skipped (may not be PostgreSQL): {type(e).__name__}")
+
 def init_db():
     """Database-i başlat (cədvəllər yarat)"""
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Database cədvəlləri yaradıldı/yoxlandı")
+        # Run migrations for existing tables
+        _run_migrations()
     except Exception as e:
         logger.error(f"❌ Database initialization error: {e}")
         raise

@@ -31,6 +31,7 @@ def init_sqlite_db():
                 body TEXT NOT NULL,
                 status TEXT DEFAULT 'pending',
                 notes TEXT,
+                reply_text TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             )
@@ -52,6 +53,17 @@ def init_sqlite_db():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_status ON applications(status)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_user ON applications(user_telegram_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_created ON applications(created_at)")
+        
+        # Migration: Add reply_text column if it doesn't exist (for existing SQLite dbs)
+        cursor.execute("PRAGMA table_info(applications)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'reply_text' not in columns:
+            logger.info("🔧 Adding reply_text column to SQLite applications table...")
+            try:
+                cursor.execute("ALTER TABLE applications ADD COLUMN reply_text TEXT")
+                logger.info("✅ reply_text column added to SQLite")
+            except Exception as e:
+                logger.warning(f"⚠️ Could not add reply_text column: {e}")
         
         conn.commit()
         logger.info(f"✅ SQLite database hazırdır: {SQLITE_DB_PATH}")
