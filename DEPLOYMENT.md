@@ -135,6 +135,30 @@ ID,Full Name,Phone,FIN,Form Type,Subject,Body,Status,Created Date,Updated Date
 3. **Token aktivdir?**
    - BotFather-də botu yoxlayın: `/mybots` → bot seç → API Token
 
+### Polling Conflict Xətası
+**Xəta:** `Conflict: terminated by other getUpdates request; make sure that only one bot instance is running`
+
+**Səbəb:** Başqa bot instance-ı hələ işləyir (əvvəlki deployment hələ bitməmişdir)
+
+**Həll:**
+1. **Railway Replica-ı kontrol edin:**
+   - Deployment settings-də `replicas = 1` olmalıdır
+   - Şəkildə replicas sayını kontrol edin
+
+2. **Əvvəlki deployment-ı durdurün:**
+   - Railway dashboard → Deployments tab-ında
+   - Əvvəlki active deployment-ı tapıb "Cancel" klikləyin
+   - Sonra yeni deploy başlayın
+
+3. **Token rotate edin (əgər hələ düzəlməzsə):**
+   - BotFather-ə `/mybots` → Bot seç → `/setcommand` → `/newapi`
+   - Yeni token-i `.env`-ə yazıb redeploy edin
+
+4. **Restart edin:**
+   - Railway dashboard-da **"Restart"** düyməsinə klikləyin
+
+⚠️ **Qeyd:** Bot `drop_pending_updates=True` istifadə edir, bunu avtomatik idarə edir
+
 ### Restart lazımdır?
 
 Railway dashboard-da **"Restart"** düyməsinə klikləyin.

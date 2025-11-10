@@ -11,6 +11,7 @@ from telegram import (
     InlineKeyboardMarkup,
     ReplyKeyboardRemove,
 )
+from telegram.error import Conflict
 from telegram.ext import (
     Application,
     ApplicationBuilder,
@@ -50,6 +51,16 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
         chat = getattr(getattr(u, "effective_chat", None), "id", None)
     except Exception:
         user = chat = None
+    
+    # Polling conflict xətası üçün xüsusi idarəetmə
+    error = context.error
+    if error and isinstance(error, Conflict):
+        logger.warning(
+            "⚠️ Polling Conflict: Başqa bot instance-ı işləyir. "
+            "Railway-də yalnız 1 replica olmalıdır, ya da əvvəlki deployment-ı durdurmalısınız."
+        )
+        return  # Bu xətaları mute edirik
+    
     logger.error(
         "Unhandled error. user=%s chat=%s", user, chat, exc_info=context.error
     )
