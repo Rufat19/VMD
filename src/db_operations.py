@@ -196,8 +196,8 @@ def export_to_csv(limit: int = 1000) -> str:
     
     # Header sətri
     writer.writerow([
-        "ID", "Tam Ad", "Telefon", "FIN", "Müraciət Tipi", 
-        "Mövzu", "Məzmun", "Status", "Yaradılma Tarixi", "Yenilənmə Tarixi"
+        "ID", "Full Name", "Phone", "FIN", "Form Type", 
+        "Subject", "Body", "Status", "Created Date", "Updated Date"
     ])
     
     # Məlumatları yaz
@@ -205,8 +205,8 @@ def export_to_csv(limit: int = 1000) -> str:
         apps = db.query(Application).order_by(Application.created_at.desc()).limit(limit).all()
         rows = []
         for app in apps:
-            form_type = "Şikayət" if app.form_type.value == "complaint" else "Təklif"
-            status_text = app.status.value if app.status is not None else "Naməlum"
+            form_type = "Complaint" if app.form_type.value == "complaint" else "Suggestion"
+            status_text = app.status.value if app.status is not None else "Unknown"
             created_str = app.created_at.strftime("%d.%m.%Y %H:%M:%S") if app.created_at is not None else ""
             updated_str = app.updated_at.strftime("%d.%m.%Y %H:%M:%S") if app.updated_at is not None else ""
             

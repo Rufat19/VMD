@@ -9,7 +9,7 @@ Tam istifadəçi və admin komanda siyahısı.
 | /help | Qısa yardım və yönləndirmə mesajı |
 | /chatid | Cari chat ID-ni göstərir (qruplar/kanallar üçün) |
 | /ping | Sadə sağlamlıq yoxlaması (Pong cavabı) |
-| /export | **PostgreSQL: CSV fayl export** (ID, Ad, Telefon, FIN, Mövzu, Məzmun, Status, Tarixlər) / **SQLite: JSON export** |
+| /export | **PostgreSQL: CSV fayl export** (ID, Full Name, Phone, FIN, Form Type, Subject, Body, Status, Created Date, Updated Date) / **SQLite: JSON export** |
 
 ## İcraçı Qrup İçi Inline Düymələr
 | Düymə | Funksiya |

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.2] - 2025-11-10 (PostgreSQL CSV Export + Session Fixes)
 ### Added
-- **PostgreSQL CSV export**: `/export` command now generates CSV file for appeals in PostgreSQL database, with proper column headers (ID, Tam Ad, Telefon, FIN, Müraciət Tipi, Mövzu, Məzmun, Status, Yaradılma/Yenilənmə Tarixləri).
+- **PostgreSQL CSV export**: `/export` command now generates CSV file for appeals in PostgreSQL database, with proper English column headers (ID, Full Name, Phone, FIN, Form Type, Subject, Body, Status, Created Date, Updated Date).
 - **Management reporting**: CSV format enables direct Excel import for pivot tables, statistics, and trend analysis.
 - **Timezone-aware timestamps**: All exported dates use dd.mm.yyyy HH:MM:SS format with Bakı timezone (Asia/Baku).
 
@@ -12,9 +12,11 @@ All notable changes to this project will be documented in this file.
 - `/export` command now returns CSV for PostgreSQL (instead of only JSON for SQLite fallback). SQLite mode still uses JSON format.
 - Version bumped to 0.4.2 with PostgreSQL CSV export as primary export method.
 - Removed "📝 İşləyir" button from executor group - unnecessary processing status feature.
+- **CSV headers now in English** to avoid UTF-8 encoding issues in Excel/LibreOffice (ID, Full Name, Phone, FIN, Form Type, Subject, Body, Status, Created Date, Updated Date).
 
 ### Fixed
 - **SQLAlchemy session detach**: Fixed "Instance not bound to a Session" error in all database query functions (`get_application_by_id()`, `get_applications_by_user()`, `get_applications_by_status()`, `search_applications()`) by properly detaching ORM objects before returning from session context.
+- **CSV encoding issues**: English headers and form type values prevent garbled characters (Ə, Ü, etc.) in exported files.
 - CSV export uses SQLAlchemy session properly with `is not None` type-safe checks instead of truthy evaluation on database columns.
 - Cavab mətni göndərərkən ("✉️ Cavablandır" düyməsi) artıq session xətası verməyəcəyi.
 

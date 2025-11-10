@@ -39,7 +39,8 @@ sosial_agent/
 - **Diaqnostika komandaları:** `/ping`, `/chatid`
 
 ### Yeni (0.4.2)
-- **PostgreSQL CSV Export:** `/export` komndasında PostgreSQL üçün CSV fayl export (ID, Tam Ad, Telefon, FIN, Müraciət Tipi, Mövzu, Məzmun, Status, Tarixlər)
+- **PostgreSQL CSV Export:** `/export` komndasında PostgreSQL üçün CSV fayl export (ID, Full Name, Phone, FIN, Form Type, Subject, Body, Status, Created Date, Updated Date)
+- **English CSV headers:** Excel/LibreOffice-da düzgün görünəş (UTF-8 encoding problemi həll edildi)
 - **Rəhbərliyə məlumat:** Admin CSV-ni download edib Excel-də müraciətləri analiz edə bilərlər
 
 ### Yeni (0.4.0)

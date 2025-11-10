@@ -105,16 +105,16 @@ Bot `/export` komandasında müraciətləri CSV formatında export edə bilərl�
 1. **Admin qrupda `/export` yazın**
 2. Bot CSV fayl göndərəcək
 3. **Excel-də açıb analiz edin:**
-   - ID, Tam Ad, Telefon, FIN
-   - Müraciət Tipi (Şikayət/Təklif)
-   - Mövzu və Məzmun
-   - Status (Gözləyir/Vaxtı keçir/İcra edildi/İmtina)
-   - Yaradılma və Yenilənmə Tarixləri
+   - ID, Full Name, Phone, FIN
+   - Form Type (Complaint/Suggestion)
+   - Subject and Body
+   - Status (Waiting/Overdue/Completed/Rejected)
+   - Created Date and Updated Date
 
 **Nümunə CSV:**
 ```
-ID,Tam Ad,Telefon,FIN,Müraciət Tipi,Mövzu,Məzmun,Status,Yaradılma Tarixi,Yenilənmə Tarixi
-1,Rəsul Babayev,+994773632066,538YB23,Şikayət,Yol xarab,Qapı yolunda çukur,Gözləyir,10.11.2025 20:54:34,10.11.2025 20:54:34
+ID,Full Name,Phone,FIN,Form Type,Subject,Body,Status,Created Date,Updated Date
+1,Rasul Babayev,+994773632066,538YB23,Complaint,Road damage,Pothole on gate road,Waiting,10.11.2025 20:54:34,10.11.2025 20:54:34
 ```
 
 **Rəhbərliyə göstərmə:**
