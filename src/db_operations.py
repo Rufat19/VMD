@@ -208,7 +208,15 @@ def export_to_csv(limit: int = 1000) -> str:
         rows = []
         for app in apps:
             form_type = "Complaint" if app.form_type.value == "complaint" else "Suggestion"
-            status_text = app.status.value if app.status is not None else "Unknown"
+            # Status daha aydın göstər
+            if app.status.value == "answered":
+                status_text = "Answered ✉️"  # Cavablandırıldı
+            elif app.status.value == "rejected":
+                status_text = "Rejected 🚫"   # İmtina edildi
+            elif app.status.value == "waiting":
+                status_text = "Waiting 🟡"    # Gözləyir
+            else:
+                status_text = app.status.value
             created_str = app.created_at.strftime("%d.%m.%Y %H:%M:%S") if app.created_at is not None else ""
             updated_str = app.updated_at.strftime("%d.%m.%Y %H:%M:%S") if app.updated_at is not None else ""
             

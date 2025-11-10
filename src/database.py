@@ -29,10 +29,10 @@ class BlacklistedUser(Base):
         return f"<BlacklistedUser(user_telegram_id={self.user_telegram_id})>"
 
 class ApplicationStatus(str, enum.Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    REJECTED = "rejected"
+    PENDING = "waiting"        # 🟡 Gözləyir
+    PROCESSING = "processing"  # (istifadə edilmir)
+    COMPLETED = "answered"     # 🟢 Cavablandırıldı ✉️
+    REJECTED = "rejected"      # ⚫ İmtina edildi 🚫
 
 class FormTypeDB(str, enum.Enum):
     COMPLAINT = "complaint"
