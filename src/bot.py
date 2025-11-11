@@ -507,7 +507,8 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if orig_content:
             user_store["exec_original_content"] = orig_content
             user_store["exec_has_photo"] = bool(getattr(query.message, "photo", None))
-    await query.answer()
+    # Callback answer + inline button ilə DM-ə keçid linki
+    await query.answer("📱 DM-ə keçilirsiniz...", show_alert=False)
     await query.edit_message_reply_markup(None)
     
     # DM-ə müraciətin tam mətnini göndər
@@ -592,7 +593,8 @@ async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if orig_content:
             user_store["exec_original_content"] = orig_content
             user_store["exec_has_photo"] = bool(getattr(query.message, "photo", None))
-    await query.answer()
+    # Callback answer + notification ilə DM-ə keçid
+    await query.answer("📱 DM-ə keçilirsiniz...", show_alert=False)
     await query.edit_message_reply_markup(None)
     
     # DM-ə müraciətin tam mətnini göndər
