@@ -489,6 +489,7 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     chat = update.effective_chat
+    user = update.effective_user
     user_store = _ud(context)
     if not query or not query.data or not str(query.data).startswith("exec_reply:"):
         return ConversationHandler.END
@@ -508,13 +509,15 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_store["exec_has_photo"] = bool(getattr(query.message, "photo", None))
     await query.answer()
     await query.edit_message_reply_markup(None)
-    if chat:
-        await context.bot.send_message(chat_id=chat.id, text=f"📝 Cavab mətni yazın (ID={app_id}):")
+    # Cavab almaq üçün DM-ə mesaj göndər (qrupda deyil)
+    if user:
+        await context.bot.send_message(chat_id=user.id, text=f"📝 Cavab mətni yazın (ID={app_id}):")
     return States.EXEC_REPLY_TEXT
 
 async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     chat = update.effective_chat
+    user = update.effective_user
     user_store = _ud(context)
     if not query or not query.data or not str(query.data).startswith("exec_reject:"):
         return ConversationHandler.END
@@ -533,8 +536,9 @@ async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_store["exec_has_photo"] = bool(getattr(query.message, "photo", None))
     await query.answer()
     await query.edit_message_reply_markup(None)
-    if chat:
-        await context.bot.send_message(chat_id=chat.id, text=f"🚫 İmtina səbəbini yazın (ID={app_id}):")
+    # İmtina səbəbini almaq üçün DM-ə mesaj göndər (qrupda deyil)
+    if user:
+        await context.bot.send_message(chat_id=user.id, text=f"🚫 İmtina səbəbini yazın (ID={app_id}):")
     return States.EXEC_REJECT_REASON
 
 async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -565,7 +569,7 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
             await context.bot.send_message(chat_id=app.user_telegram_id, text=f"✅ Müraciətinizə cavab:\n\n{text}")  # type: ignore[arg-type]
             update_application_status(app_id, ApplicationStatus.COMPLETED, notes=f"Replied by @{from_user.username or from_user.id}", reply_text=text)
         
-        # Qrup mesajında statusu yenilə
+        # Qrup mesajında statusu yenilə (cavab mesajı göstərmə, sadəcə status dəyiş)
         if exec_msg_id and exec_chat_id:
             try:
                 orig_content = user_store.get("exec_original_content", "")
@@ -629,7 +633,7 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
             await context.bot.send_message(chat_id=app.user_telegram_id, text=f"❌ Müraciət rədd edildi. Səbəb:\n\n{reason}")  # type: ignore[arg-type]
             update_application_status(app_id, ApplicationStatus.REJECTED, notes=f"Rejected by @{from_user.username or from_user.id}: {reason}", reply_text=reason)
         
-        # Qrup mesajında statusu yenilə
+        # Qrup mesajında statusu yenilə (cavab mesajı göstərmə, sadəcə status dəyiş)
         if exec_msg_id and exec_chat_id:
             try:
                 orig_content = user_store.get("exec_original_content", "")
