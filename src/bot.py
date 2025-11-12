@@ -222,6 +222,81 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.error(f"Rate limiting yoxlaması xətası: {e}")
             # Xəta olarsa, istifadəçini bloklamırıq
     
+    # Deep link parametrləri: reply_<id> və reject_<id>
+    try:
+        args = context.args if context.args else []
+    except Exception:
+        args = []
+    if args:
+        param = args[0]
+        if isinstance(param, str) and param.startswith("reply_"):
+            try:
+                app_id = int(param.split("_", 1)[1])
+                if context.user_data is not None:
+                    context.user_data["exec_app_id"] = app_id
+                # Müraciət xülasəsini DM-də göstər və cavabı istə
+                app_text: Optional[str] = None
+                sqlite_photo_id: Optional[str] = None
+                if USE_SQLITE:
+                    from db_sqlite import get_application_by_id_sqlite
+                    app_data = get_application_by_id_sqlite(app_id)
+                    if app_data:
+                        time_str = str(app_data.get('created_at', ''))
+                        app_text = (
+                            "📋 Müraciət xülasəsi:\n"
+                            f"👤 {app_data.get('fullname', '')}\n"
+                            f"📱 Mobil nömrə: {app_data.get('phone', '')}\n"
+                            f"🆔 FIN: {app_data.get('fin', '')}\n"
+                            f"✍️ Məzmun: {app_data.get('body', '')}\n\n"
+                            f"⏰ {time_str}\n"
+                            "━━━━━━━━━━━━━━━━━━━━\n"
+                            "📝 Cavab mətni yazın:"
+                        )
+                        raw = app_data.get('id_photo_file_id')
+                        if isinstance(raw, str) and raw:
+                            sqlite_photo_id = raw
+                else:
+                    from db_operations import get_application_by_id
+                    app = get_application_by_id(app_id)
+                    if app:
+                        try:
+                            from config import BAKU_TZ
+                            from datetime import timezone
+                            dt = app.created_at
+                            if dt is not None and getattr(dt, 'tzinfo', None) is None:
+                                dt = dt.replace(tzinfo=timezone.utc)
+                            time_str = dt.astimezone(BAKU_TZ).strftime('%d.%m.%y %H:%M:%S') if dt is not None else ''  # type: ignore[union-attr]
+                        except Exception:
+                            time_str = app.created_at.strftime('%d.%m.%y %H:%M:%S') if (app.created_at is not None) else ''  # type: ignore[union-attr]
+                        app_text = (
+                            "📋 Müraciət xülasəsi:\n"
+                            f"👤 {app.fullname}\n"
+                            f"📱 Mobil nömrə: {app.phone}\n"
+                            f"🆔 FIN: {app.fin}\n"
+                            f"✍️ Məzmun: {app.body}\n\n"
+                            f"⏰ {time_str}\n"
+                            "━━━━━━━━━━━━━━━━━━━━\n"
+                            "📝 Cavab mətni yazın:"
+                        )
+                if app_text:
+                    if sqlite_photo_id:
+                        await msg.reply_photo(photo=sqlite_photo_id, caption=app_text)
+                    else:
+                        await msg.reply_text(app_text)
+                return States.EXEC_REPLY_TEXT
+            except Exception:
+                pass
+        elif isinstance(param, str) and param.startswith("reject_"):
+            try:
+                app_id = int(param.split("_", 1)[1])
+                if context.user_data is not None:
+                    context.user_data["exec_app_id"] = app_id
+                notice = "📋 Müraciət xülasəsi göndərildi.\n👇 İmtina səbəbini yazın:"
+                await msg.reply_text(notice)
+                return States.EXEC_REJECT_REASON
+            except Exception:
+                pass
+
     await msg.reply_text(
         MESSAGES["welcome"],
         reply_markup=ReplyKeyboardRemove(),
@@ -524,8 +599,15 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     user_store["exec_photo_file_id"] = photos[-1].file_id
                 except Exception:
                     pass
-    # Callback answer + inline button ilə DM-ə keçid linki
-    await query.answer("📱 DM-ə keçilirsiniz...", show_alert=False)
+    # Callback cavabı: DM-ə keçid üçün deep link əlavə et
+    url = None
+    try:
+        bot_username = context.bot.username
+        if bot_username:
+            url = f"https://t.me/{bot_username}?start=reply_{app_id}"
+    except Exception:
+        url = None
+    await query.answer("📱 DM-ə keçilirsiniz...", show_alert=False, url=url)
     await query.edit_message_reply_markup(None)
     
     # DM-ə müraciətin tam mətnini göndər
@@ -626,8 +708,15 @@ async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     user_store["exec_photo_file_id"] = photos[-1].file_id
                 except Exception:
                     pass
-    # Callback answer + notification ilə DM-ə keçid
-    await query.answer("📱 DM-ə keçilirsiniz...", show_alert=False)
+    # Callback cavabı: DM-ə keçid üçün deep link əlavə et
+    url = None
+    try:
+        bot_username = context.bot.username
+        if bot_username:
+            url = f"https://t.me/{bot_username}?start=reject_{app_id}"
+    except Exception:
+        url = None
+    await query.answer("📱 DM-ə keçilirsiniz...", show_alert=False, url=url)
     await query.edit_message_reply_markup(None)
     
     # DM-ə müraciətin tam mətnini göndər
