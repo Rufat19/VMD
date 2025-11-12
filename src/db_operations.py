@@ -238,7 +238,8 @@ def export_to_csv(limit: int = 1000) -> str:
     from datetime import datetime
     
     csv_buffer = io.StringIO()
-    writer = csv.writer(csv_buffer)
+    # Excel və standart CSV tələblərinə uyğun: UTF-8 BOM, proper quoting
+    writer = csv.writer(csv_buffer, quoting=csv.QUOTE_ALL, lineterminator='\n')
     
     # Header sətri (Azərbaycan dilində)
     writer.writerow([
@@ -301,7 +302,9 @@ def export_to_csv(limit: int = 1000) -> str:
     writer.writerows(rows)
     csv_content = csv_buffer.getvalue()
     csv_buffer.close()
-    return csv_content
+    
+    # UTF-8 BOM əlavə et ki, Excel Azərbaycan hərflərini düzgün göstərsin
+    return '\ufeff' + csv_content
 
 def delete_all_applications() -> int:
     """Bütün müraciətləri silinə billər (test məlumatları üçün)"""
