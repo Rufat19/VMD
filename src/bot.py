@@ -531,7 +531,7 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"✍️ Məzmun: {app_data.get('body', '')}\n\n"
                         f"⏰ {time_str}\n"
                         "━━━━━━━━━━━━━━━━━━━━\n"
-                        "👇 Aşağıya cavab yazın:"
+                        "Müraciət sizin tərəfinizdən qəbul edildi:"
                     )
                     id_photo = app_data.get('id_photo_file_id')
             else:
@@ -548,7 +548,7 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"✍️ Məzmun: {app.body}\n\n"
                         f"⏰ {time_str}\n"
                         "━━━━━━━━━━━━━━━━━━━━\n"
-                        "👇 Aşağıya cavab yazın:"
+                        "Müraciət sizin tərəfinizdən qəbul edildi:"
                     )
                     id_photo = app.id_photo_file_id  # type: ignore[assignment]
             
@@ -659,10 +659,10 @@ async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from_user = update.effective_user
     msg = update.effective_message
-    user_store = _ud(context)
-    app_id = user_store.get("exec_app_id")
-    exec_msg_id = user_store.get("exec_msg_id")
-    exec_chat_id = user_store.get("exec_chat_id")
+    user_data = context.user_data if context.user_data else {}
+    app_id = user_data.get("exec_app_id")
+    exec_msg_id = user_data.get("exec_msg_id")
+    exec_chat_id = user_data.get("exec_chat_id")
     if not msg or not msg.text or not app_id or not from_user:
         return States.EXEC_REPLY_TEXT
     text = msg.text.strip()
@@ -687,8 +687,8 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
         # Qrup mesajında statusu yenilə (cavab mesajı göstərmə, sadəcə status dəyiş)
         if exec_msg_id and exec_chat_id:
             try:
-                orig_content = user_store.get("exec_original_content", "")
-                has_photo = user_store.get("exec_has_photo", False)
+                orig_content = user_data.get("exec_original_content", "")
+                has_photo = user_data.get("exec_has_photo", False)
                 # Status sətirini dəyiş: 🟡 Gözləyir → 🟢 İcra edildi
                 new_content = re.sub(
                     r"🟡 Status: Gözləyir",
@@ -715,18 +715,20 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
         logger.error(f"exec_collect_reply_text error: {e}")
         await msg.reply_text(f"❌ Xəta: {e}")
     finally:
-        user_store.pop("exec_app_id", None)
-        user_store.pop("exec_msg_id", None)
-        user_store.pop("exec_chat_id", None)
+        user_data.pop("exec_app_id", None)
+        user_data.pop("exec_msg_id", None)
+        user_data.pop("exec_chat_id", None)
+        user_data.pop("exec_original_content", None)
+        user_data.pop("exec_has_photo", None)
     return ConversationHandler.END
 
 async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from_user = update.effective_user
     msg = update.effective_message
-    user_store = _ud(context)
-    app_id = user_store.get("exec_app_id")
-    exec_msg_id = user_store.get("exec_msg_id")
-    exec_chat_id = user_store.get("exec_chat_id")
+    user_data = context.user_data if context.user_data else {}
+    app_id = user_data.get("exec_app_id")
+    exec_msg_id = user_data.get("exec_msg_id")
+    exec_chat_id = user_data.get("exec_chat_id")
     if not msg or not msg.text or not app_id or not from_user:
         return States.EXEC_REJECT_REASON
     reason = msg.text.strip()
@@ -751,8 +753,8 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
         # Qrup mesajında statusu yenilə (cavab mesajı göstərmə, sadəcə status dəyiş)
         if exec_msg_id and exec_chat_id:
             try:
-                orig_content = user_store.get("exec_original_content", "")
-                has_photo = user_store.get("exec_has_photo", False)
+                orig_content = user_data.get("exec_original_content", "")
+                has_photo = user_data.get("exec_has_photo", False)
                 # Status sətirini dəyiş: 🟡 Gözləyir → ⚫ İmtina
                 new_content = re.sub(
                     r"🟡 Status: Gözləyir",
@@ -808,11 +810,11 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
         logger.error(f"exec_collect_reject_reason error: {e}")
         await msg.reply_text(f"❌ Xəta: {e}")
     finally:
-        user_store.pop("exec_app_id", None)
-        user_store.pop("exec_msg_id", None)
-        user_store.pop("exec_chat_id", None)
-        user_store.pop("exec_original_content", None)
-        user_store.pop("exec_has_photo", None)
+        user_data.pop("exec_app_id", None)
+        user_data.pop("exec_msg_id", None)
+        user_data.pop("exec_chat_id", None)
+        user_data.pop("exec_original_content", None)
+        user_data.pop("exec_has_photo", None)
     return ConversationHandler.END
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
