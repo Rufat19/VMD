@@ -161,7 +161,7 @@ class ApplicationData:
             f"📱 Mobil nömrə: {self.phone}\n"
             f"🆔 FIN: {self.fin}\n"
             # Form növü gizlədilib (istifadəçi və qrup mesajlarında göstərilmir)
-            f"✍️ Məzmun: {self.body}\n\n"
+            f"✍️ Müraciət mətni: {self.body}\n\n"
             f"{time_str}"
         )
 
@@ -338,7 +338,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def collect_fullname(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
-    if not msg or not msg.text:
+    if not msg or not msg.text or not msg.text.strip():
         return States.FULLNAME
     # Ad soyad normalizasiyası: artıq boşluqları sil və standartlaşdır
     name = " ".join(msg.text.split()).strip()
@@ -540,9 +540,9 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     caption = (
         caption_prefix +
         status_line +
-        "🆕 Yeni Müraciət\n\n" + app.summary_text() + 
-        f"\nGöndərən: @{query.from_user.username or 'istifadəçi adı yoxdur'}\n"
-        f"User ID: {query.from_user.id}"
+        "🆕 Yeni müraciət\n\n" + app.summary_text() + 
+        f"\n👤 Göndərən: @{query.from_user.username or 'istifadəçi adı yoxdur'}\n"
+        f"🆔 User ID: {query.from_user.id}"
     )
 
     # İcraçı qrupuna mesaj + foto (yalnız EXECUTOR_CHAT_ID düzgün olduqda)
@@ -658,7 +658,7 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"👤 {app_data.get('fullname', '')}\n"
                         f"📱 Mobil nömrə: {app_data.get('phone', '')}\n"
                         f"🆔 FIN: {app_data.get('fin', '')}\n"
-                        f"✍️ Məzmun: {app_data.get('body', '')}\n\n"
+                        f"✍️ Müraciət mətni: {app_data.get('body', '')}\n\n"
                         f"⏰ {time_str}\n"
                         "━━━━━━━━━━━━━━━━━━━━\n"
                         "Müraciət sizin tərəfinizdən qəbul edildi:"
@@ -682,7 +682,7 @@ async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"👤 {app.fullname}\n"
                         f"📱 Mobil nömrə: {app.phone}\n"
                         f"🆔 FIN: {app.fin}\n"
-                        f"✍️ Məzmun: {app.body}\n\n"
+                        f"✍️ Müraciət mətni: {app.body}\n\n"
                         f"⏰ {time_str}\n"
                         "━━━━━━━━━━━━━━━━━━━━\n"
                         "Müraciət sizin tərəfinizdən qəbul edildi:"
@@ -766,7 +766,7 @@ async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"👤 {app_data.get('fullname', '')}\n"
                         f"📱 Mobil nömrə: {app_data.get('phone', '')}\n"
                         f"🆔 FIN: {app_data.get('fin', '')}\n"
-                        f"✍️ Məzmun: {app_data.get('body', '')}\n\n"
+                        f"✍️ Müraciət mətni: {app_data.get('body', '')}\n\n"
                         f"⏰ {time_str}\n"
                         "━━━━━━━━━━━━━━━━━━━━\n"
                         "👇 İmtina səbəbini yazın:"
@@ -793,7 +793,7 @@ async def exec_reject_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"👤 {app.fullname}\n"
                         f"📱 Mobil nömrə: {app.phone}\n"
                         f"🆔 FIN: {app.fin}\n"
-                        f"✍️ Məzmun: {app.body}\n\n"
+                        f"✍️ Müraciət mətni: {app.body}\n\n"
                         f"⏰ {time_str}\n"
                         "━━━━━━━━━━━━━━━━━━━━\n"
                         "👇 İmtina səbəbini yazın:"

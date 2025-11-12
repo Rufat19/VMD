@@ -89,23 +89,23 @@ BLACKLIST_WINDOW_DAYS = 30         # bu qədər gün ərzində
 # Mətnlər (Azərbaycan dili)
 MESSAGES = {
     "welcome": (
-        "Zəhmət olmasa əvvəlcə SOYAD, AD və ATA ADINIZI daxil edin.\n"
+        "Soyad, ad və ata adınızı yazın (məs.: Məmmədov Kamran Əli oğlu).\n"
     ),
-    "fullname_error": "Zəhmət olmasa SOYAD və AD daxil edin (ATA ADI da ola bilər).",
-    "phone_prompt": "📱 Mobil nömrənizi daxil edin.\nMəsələn: +994501234567",
-    "phone_error": "Nömrə düzgün formatda deyil. Məsələn: +994501234567",
-    "fin_prompt": "🆔 Şəxsiyyət vəsiqənizin FIN kodunu daxil edin (7 simvol).",
-    "fin_error": "FIN 7 simvoldan ibarət olmalıdır (latın hərf/rəqəm).",
-    "id_photo_prompt": "📸 Şəxsiyyət vəsiqənizin ön tərəfinin şəklini göndərin (foto kimi).",
-    "id_photo_error": "Zəhmət olmasa foto göndərin.",
+    "fullname_error": "Xahiş edirik soyad və adı düzgün daxil edin (ata adı əlavə oluna bilər).",
+    "phone_prompt": "📱 Mobil nömrənizi daxil edin (məs.: +994501234567)",
+    "phone_error": "Nömrə düzgün formatda deyil (məs.: +994501234567)",
+    "fin_prompt": "🆔 Şəxsiyyət vəsiqənizin FIN kodunu daxil edin (7 simvol)",
+    "fin_error": "FIN 7 simvoldan ibarət olmalıdır (latın hərf və rəqəm)",
+    "id_photo_prompt": "📸 Şəxsiyyət vəsiqənizin ön tərəfinin şəklini foto kimi göndərin",
+    "id_photo_error": "Zəhmət olmasa foto göndərin",
     "form_type_prompt": "📋 Müraciət növünü seçin:",
-    "body_prompt": "✍️ Müraciət mətnini ətraflı yazın (max 1000 simvol).",
-    "body_error": "Mətn çox qısadır (min 10 simvol) və ya çox uzundur (max 1000 simvol).",
-    "confirm_sent": "✅ Müraciət təsdiqləndi və icraçılara göndərilir…",
-    "success": "✅ Müraciətiniz qeydə alındı. Təşəkkürlər!",
-    "cancelled": "❌ Müraciət ləğv edildi.",
-    "help": "ℹ️ /start ilə yeni müraciət göndərə bilərsiniz.\n/chatid ilə bu qrup/kanalın ID-ni görə bilərsiniz.",
-    "unknown": "⚠️ Anlaşılmadı. /start yazın.",
+    "body_prompt": "✍️ Müraciətinizi aydın və qısa şəkildə yazın (max 1000 simvol)",
+    "body_error": "Mətn çox qısa (min 10) və ya çox uzundur (max 1000). Xahiş edirik yenidən göndərin.",
+    "confirm_sent": "✅ Müraciət təsdiqləndi və icraçılara yönləndirildi",
+    "success": "✅ Müraciətiniz qeydə alındı. Təşəkkür edirik!",
+    "cancelled": "❌ Müraciət ləğv edildi",
+    "help": "ℹ️ /start ilə yeni müraciət göndərə bilərsiniz. /chatid ilə bu qrup/kanalın ID-sini görə bilərsiniz.",
+    "unknown": "⚠️ Anlaşılmadı. Zəhmət olmasa /start yazın.",
 }
 
 logger.info(f"Konfiqurasiya yükləndi: {LANG.upper()}")
