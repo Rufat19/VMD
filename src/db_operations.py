@@ -243,8 +243,8 @@ def export_to_csv(limit: int = 1000) -> str:
     
     # Header sətri (Azərbaycan dilində)
     writer.writerow([
-        "ID", "Ad Soyad", "Telefon", "FIN", "Form Növü",
-        "Məzmun", "Status", "Cavab", "Yaradılma Tarixi", "Yenilənmə Tarixi"
+        "ID", "SAA", "Telefon", "FIN", "Müraciət növü",
+        "Müraciət mətni", "Status", "Cavab", "Qeydiyyat tarixi", "Cavablandırılma tarixi"
     ])
     
     # Məlumatları yaz
