@@ -5,7 +5,28 @@ High-level plan for future evolution of the DSMF Citizen Appeal Bot.
 ## Vision
 Provide a reliable, auditable, multilingual platform for collecting citizen appeals, routing them to appropriate staff, tracking lifecycle state, and closing the feedback loop with timely responses.
 
-## Current Release (0.4.1) - Railway Production Fixes ✅
+## Current Release (0.4.3) - UX & Data Quality Improvements ✅
+### Completed Features (2025-01-10)
+- ✅ Simplified intake flow: removed subject step (auto-generated from body)
+- ✅ Three form types: Şikayət (Complaint), Təklif (Suggestion), Ərizə (Application)
+- ✅ Enhanced CSV export:
+  - Azerbaijani column headers and status labels
+  - Baku timezone (UTC+4) for all timestamps
+  - Excel-compatible phone number formatting (text format with apostrophe prefix)
+  - UTF-8 BOM for proper Azerbaijani character display
+- ✅ Database optimization: removed unused columns (subject, id_photo_file_id from PostgreSQL)
+- ✅ Photo display maintained in Telegram (not stored in PostgreSQL, available in SQLite)
+- ✅ Welcome message streamlined (removed redundant step descriptions)
+
+## Previous Release (0.4.2) - CSV Export & Admin Tools ✅
+### Completed Features (2025-11-10)
+- ✅ PostgreSQL CSV export with `/export` command
+- ✅ Admin commands: `/blacklist`, `/ban`, `/unban`, `/clearall`
+- ✅ Rate limiting: max 3 submissions per 24 hours
+- ✅ Automatic blacklist for users with 5+ rejections in 30 days
+- ✅ SLA reminders: daily notifications for 3+ day pending appeals
+
+## Previous Release (0.4.1) - Railway Production Fixes ✅
 ### Completed Features (2025-11-09)
 - ✅ PostgreSQL authentication via Railway PUBLIC proxy URL (maglev.proxy.rlwy.net)
 - ✅ SQLAlchemy session detach fix for production stability
@@ -23,7 +44,7 @@ Provide a reliable, auditable, multilingual platform for collecting citizen appe
 - ⏳ **Webhook mode** (alternative to polling for zero-conflict guarantee)
 - ⏳ **Connection pooling** (PostgreSQL production hardening, retry backoff)
 - ⏳ Admin statistics `/stats` (total, by status, avg response time, overdue count)
-- ⏳ Search `/search` (FIN, phone, ID, keyword in subject/body)
+- ⏳ Search `/search` (FIN, phone, ID, keyword in body)
 - ⏳ Application editing before final confirmation
 - ⏳ Phone normalization & duplicate detection
 - ⏳ Unit test coverage for conversation + executor flows
@@ -61,7 +82,4 @@ Provide a reliable, auditable, multilingual platform for collecting citizen appe
 - **Major (X.0.0)**: Architectural shifts (e.g. move to microservices, encryption layer).
 
 ---
-Last updated: 2025-11-09 (v0.3.0 release)
-
----
-Last updated: 2025-11-09 (v0.3.0 release)
+Last updated: 2025-01-10 (v0.4.3 release)

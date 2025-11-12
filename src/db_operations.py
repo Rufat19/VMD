@@ -267,7 +267,14 @@ def export_to_csv(limit: int = 1000) -> str:
                     return ""
 
         for app in apps:
-            form_type = "Şikayət" if app.form_type.value == "complaint" else "Təklif"
+            # Form növü tərcüməsi
+            if app.form_type.value == "complaint":
+                form_type = "Şikayət"
+            elif app.form_type.value == "suggestion":
+                form_type = "Təklif"
+            else:  # application
+                form_type = "Ərizə"
+            
             # Status daha aydın göstər (Azərbaycan dilində)
             if app.status.value == "answered":
                 status_text = "Cavablandırıldı ✉️"
@@ -284,7 +291,7 @@ def export_to_csv(limit: int = 1000) -> str:
             rows.append([
                 app.id,
                 app.fullname or "",
-                app.phone or "",
+                "'" + (app.phone or ""),  # Excel üçün mətn formatı
                 app.fin or "",
                 form_type,
                 app.body or "",

@@ -37,6 +37,7 @@ class ApplicationStatus(str, enum.Enum):
 class FormTypeDB(str, enum.Enum):
     COMPLAINT = "complaint"
     SUGGESTION = "suggestion"
+    APPLICATION = "application"
 
 class Application(Base):
     """Vətəndaş müraciəti"""

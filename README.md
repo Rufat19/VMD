@@ -1,6 +1,6 @@
 # DSMF Vətəndaş Müraciət Botu  
-**Versiya:** 0.4.2  
-**Son yeniləmə:** 2025-11-10
+**Versiya:** 0.4.3  
+**Son yeniləmə:** 2025-01-10
 
 Bu layihə vətəndaşlardan mərhələli anket ilə məlumat toplayıb icraçı qrupuna yönləndirir, qrupdakı əməkdaşların inline düymələrlə cavab / imtina etməsinə imkan verir və cavabı vətəndaşa DM ilə çatdırır. Qrup mesajlarında real-time status göstəricisi mövcuddur.
 
@@ -19,8 +19,8 @@ sosial_agent/
 ```
 
 ## ✨ Xüsusiyyətlər
-- **Mərhələli anket:** Ad Soyad Ata adı, Mobil nömrə, FIN, Şəxsiyyət vəsiqəsi şəkli, Növ (Şikayət/Təklif), Mövzu, Məzmun
-- **Mövzu və məzmun limitləri:** Mövzu max 150 simvol, məzmun max 1000 simvol (beynəlxalq standartlara uyğun)
+- **Mərhələli anket:** Ad Soyad, Mobil nömrə, FIN, Şəxsiyyət vəsiqəsi şəkli, Növ (Şikayət/Təklif/Ərizə), Məzmun
+- **Məzmun limiti:** Max 1000 simvol (beynəlxalq standartlara uyğun)
 - **Qısaldılmış timestamp:** ⏰ 09.11.25 19:21:10 formatında
 - **Status sistemi:** Qrup mesajlarında real-time status göstəricisi
   - 🟡 **Gözləyir** - yeni müraciət (0-9 gün)
@@ -38,7 +38,16 @@ sosial_agent/
 - **`/export` CSV export** (PostgreSQL: CSV fayl, SQLite: JSON)
 - **Diaqnostika komandaları:** `/ping`, `/chatid`
 
-### Yeni (0.4.2)
+### Yeni (0.4.3)
+- **Üç form növü:** Şikayət, Təklif, və Ərizə
+- **Sadələşdirilmiş anket axını:** Mövzu addımı çıxarıldı - vətəndaşlar birbaşa məzmun yazır (mövzu avtomatik məzmundan yaranır)
+- **Yaxşılaşdırılmış CSV export:**
+  - Azərbaycan dilində başlıqlar və statuslar
+  - Bakı vaxtı timezone (UTC+4)
+  - Excel üçün telefon nömrələri düzgün formatda (mətn olaraq)
+  - UTF-8 BOM dəstəyi (Azərbaycan hərfləri üçün)
+
+### Əvvəlki versiyalar (0.4.2)
 - **PostgreSQL CSV Export:** `/export` komndasında PostgreSQL üçün CSV fayl export (ID, Full Name, Phone, FIN, Form Type, Subject, Body, Status, Created Date, Updated Date)
 - **English CSV headers:** Excel/LibreOffice-da düzgün görünəş (UTF-8 encoding problemi həll edildi)
 - **Rəhbərliyə məlumat:** Admin CSV-ni download edib Excel-də müraciətləri analiz edə bilərlər

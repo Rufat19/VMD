@@ -123,6 +123,7 @@ else:
 class FormType(str, Enum):
     COMPLAINT = "Şikayət"
     SUGGESTION = "Təklif"
+    APPLICATION = "Ərizə"
 
 class States(Enum):
     FULLNAME = auto()
@@ -283,6 +284,7 @@ async def collect_id_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     buttons = [
         [InlineKeyboardButton(FormType.COMPLAINT.value, callback_data="type_complaint")],
         [InlineKeyboardButton(FormType.SUGGESTION.value, callback_data="type_suggestion")],
+        [InlineKeyboardButton(FormType.APPLICATION.value, callback_data="type_application")],
     ]
     if msg:
         await msg.reply_text(
@@ -299,8 +301,10 @@ async def choose_form_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     if query.data == "type_complaint":
         _ud(context)["app"].form_type = FormType.COMPLAINT  # type: ignore[index]
-    else:
+    elif query.data == "type_suggestion":
         _ud(context)["app"].form_type = FormType.SUGGESTION  # type: ignore[index]
+    else:
+        _ud(context)["app"].form_type = FormType.APPLICATION  # type: ignore[index]
     # Mövzu addımı çıxarıldı – birbaşa mətni toplayırıq
     await query.edit_message_text(MESSAGES["body_prompt"])
     return States.BODY

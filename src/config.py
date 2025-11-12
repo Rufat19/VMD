@@ -100,8 +100,6 @@ MESSAGES = {
     "id_photo_prompt": "📸 Şəxsiyyət vəsiqənizin ön tərəfinin şəklini göndərin (foto kimi).",
     "id_photo_error": "Zəhmət olmasa foto göndərin.",
     "form_type_prompt": "📋 Müraciət növünü seçin:",
-    "subject_prompt": "📝 Müraciətin mövzusunu yazın (max 150 simvol).",
-    "subject_error": "Mövzu çox qısadır (min 5 simvol) və ya çox uzundur (max 150 simvol).",
     "body_prompt": "✍️ Müraciət mətnini ətraflı yazın (max 1000 simvol).",
     "body_error": "Mətn çox qısadır (min 10 simvol) və ya çox uzundur (max 1000 simvol).",
     "confirm_sent": "✅ Müraciət təsdiqləndi və icraçılara göndərilir…",
