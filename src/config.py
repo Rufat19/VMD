@@ -76,7 +76,7 @@ MIN_NAME_LENGTH = 2
 MIN_SUBJECT_LENGTH = 5
 MAX_SUBJECT_LENGTH = 150  # Beynəlxalq standart (email subject kimi)
 MIN_BODY_LENGTH = 10
-MAX_BODY_LENGTH = 1000    # Orta müraciət üçün optimal
+MAX_BODY_LENGTH = 350     # Daha yığcam müraciət üçün yeni limit
 FIN_LENGTH = 7
 
 # Rate limiting - Spam qarşısı
@@ -100,8 +100,8 @@ MESSAGES = {
     "id_photo_prompt": "📸 Şəxsiyyət vəsiqənizin ön tərəfinin şəklini foto kimi göndərin",
     "id_photo_error": "Zəhmət olmasa foto göndərin",
     "form_type_prompt": "📋 Müraciət növünü seçin:",
-    "body_prompt": "✍️ Müraciətinizi aydın və qısa şəkildə yazın (max 1000 simvol)",
-    "body_error": "Mətn çox qısa (min 10) və ya çox uzundur (max 1000). Xahiş edirik yenidən göndərin.",
+    "body_prompt": "✍️ Müraciətinizi aydın və qısa şəkildə yazın (max 350 simvol)",
+    "body_error": "Mətn çox qısa (min 10) və ya çox uzundur (max 350). Xahiş edirik yenidən göndərin.",
     "confirm_sent": "✅ Müraciət təsdiqləndi və icraçılara yönləndirildi",
     "success": "✅ Müraciətiniz qeydə alındı. Təşəkkür edirik!",
     "cancelled": "❌ Müraciət ləğv edildi",
