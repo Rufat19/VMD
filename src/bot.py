@@ -34,6 +34,8 @@ from config import (
     MAX_BODY_LENGTH,
     FIN_LENGTH,
     BAKU_TZ,
+    MAX_DAILY_SUBMISSIONS,
+    MAX_MONTHLY_SUBMISSIONS,
     setup_logging,
 )
 import re
@@ -226,7 +228,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 from db_operations import count_user_recent_applications
                 recent_count = count_user_recent_applications(uid, hours=24)  # type: ignore[possibly-unbound]
 
-            from config import MAX_DAILY_SUBMISSIONS, MAX_MONTHLY_SUBMISSIONS, MESSAGES
             if recent_count >= MAX_DAILY_SUBMISSIONS:
                 await msg.reply_text(
                     f"⚠️ Siz artıq son 24 saatda {MAX_DAILY_SUBMISSIONS} müraciət göndərmisiniz.\n"
