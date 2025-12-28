@@ -292,7 +292,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     app = get_application_by_id(app_id)
                     if app:
                         try:
-                            from config import BAKU_TZ
                             from datetime import timezone
                             dt = app.created_at
                             if dt is not None and getattr(dt, 'tzinfo', None) is None:
