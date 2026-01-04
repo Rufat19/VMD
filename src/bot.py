@@ -169,6 +169,7 @@ class ApplicationData:
         )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global ADMIN_USER_IDS
     msg = update.effective_message
     # Diaqnostika üçün loq (istifadəçi və çat məlumatları)
     uid = getattr(update.effective_user, "id", None)
