@@ -1169,6 +1169,12 @@ async def chatid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def export_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """CSV export - PostgreSQL və SQLite hər ikisində işləyir"""
+    global ADMIN_USER_IDS
+    user_id = getattr(update.effective_user, "id", None)
+    if user_id not in ADMIN_USER_IDS:
+        if update.effective_message:
+            await update.effective_message.reply_text("❌ Bu komanda yalnız adminlər üçün açıqdır.")
+        return
     if not DB_ENABLED:
         if update.effective_message:
             await update.effective_message.reply_text("⚠️ Database deaktiv, export mümkün deyil.")

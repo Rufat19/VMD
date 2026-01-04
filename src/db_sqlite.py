@@ -295,7 +295,9 @@ def delete_all_applications_sqlite() -> int:
     with get_sqlite_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM applications")
+        # ID sıfırlama (AUTOINCREMENT üçün)
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='applications'")
         conn.commit()
         deleted = cursor.rowcount
-        logger.info(f"✅ {deleted} müraciət silindi")
+        logger.info(f"✅ {deleted} müraciət silindi və ID sıfırlandı")
         return deleted

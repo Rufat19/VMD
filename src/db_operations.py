@@ -346,5 +346,9 @@ def delete_all_applications() -> int:
     with get_db() as db:
         count = db.query(Application).delete()
         db.commit()
-        logger.info(f"✅ {count} müraciət silindi")
+        # PostgreSQL üçün ID sıfırlama
+        from sqlalchemy import text
+        db.execute(text("ALTER SEQUENCE applications_id_seq RESTART WITH 1"))
+        db.commit()
+        logger.info(f"✅ {count} müraciət silindi və ID sıfırlandı")
         return count
