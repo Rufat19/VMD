@@ -77,7 +77,9 @@ MIN_SUBJECT_LENGTH = 5
 MAX_SUBJECT_LENGTH = 150  # Beynəlxalq standart (email subject kimi)
 MIN_BODY_LENGTH = 10
 MAX_BODY_LENGTH = 350     # Daha yığcam müraciət üçün yeni limit
-FIN_LENGTH = 7
+FIN_LENGTH = 7  # Şəxsiyyət Vəsiqəsi FIN kodu uzunluğu
+PIN_MIN_LENGTH = 5  # DYİ PIN uzunluğu (minimum)
+PIN_MAX_LENGTH = 6  # DYİ PIN uzunluğu (maksimum)
 
 # Rate limiting - Spam qarşısı
 MAX_DAILY_SUBMISSIONS = 3  # İstifadəçi 24 saatda max 3 müraciət göndərə bilər
@@ -96,15 +98,21 @@ MESSAGES = {
     "fullname_error": "Xahiş edirik soyad və adı düzgün daxil edin (ata adı əlavə oluna bilər).",
     "phone_prompt": "📱 Mobil nömrənizi daxil edin (məs.: +994501234567)",
     "phone_error": "Nömrə düzgün formatda deyil (məs.: +994501234567)",
+    "id_type_prompt": "🆔 Vəsiqə növünü seçin:",
     "fin_prompt": "🆔 Şəxsiyyət vəsiqənizin FIN kodunu daxil edin (7 simvol)",
     "fin_error": "FIN 7 simvoldan ibarət olmalıdır (latın hərf və rəqəm)",
-    "id_photo_prompt": "📸 Şəxsiyyət vəsiqənizin ön tərəfinin şəklini foto kimi göndərin",
+    "pin_prompt": "🆔 Daimi yaşayış icazəsinizin PİN kodunu daxil edin (5-6 simvol)",
+    "pin_error": "PİN 5-6 simvoldan ibarət olmalıdır (latın hərf və rəqəm)",
+    "id_photo_prompt": "📸 Şəxsiyyət vəsiqəsinin və ya Daimi yaşayış icazəsi ön tərəfinin şəklini foto kimi göndərin",
     "id_photo_error": "Zəhmət olmasa foto göndərin",
     "form_type_prompt": "📋 Müraciət növünü seçin:",
     "body_prompt": "✍️ Müraciətinizi aydın və qısa şəkildə yazın (max 350 simvol)",
     "body_error": "Mətn çox qısa (min 10) və ya çox uzundur (max 350). Xahiş edirik yenidən göndərin.",
-    "confirm_sent": "✅ Müraciət təsdiqləndi və icraçılara yönləndirildi",
-    "success": "✅ Müraciətiniz qeydə alındı. Təşəkkür edirik!",
+    "confirm_sent": (
+        "✅ Müraciətiniz qeydə alındı və icraçılara yönləndirildi. "
+        "Müraciətinizin cavabı verildikdə siz bununla bağlı bildiriş alacaqsınız."
+    ),
+    "success": "",
     "cancelled": "❌ Müraciət ləğv edildi",
     "help": "ℹ️ /start ilə yeni müraciət göndərə bilərsiniz. /chatid ilə bu qrup/kanalın ID-sini görə bilərsiniz.",
     "unknown": "⚠️ Anlaşılmadı. Zəhmət olmasa /start yazın.",

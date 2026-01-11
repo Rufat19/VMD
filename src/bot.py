@@ -33,6 +33,8 @@ from config import (
     MIN_BODY_LENGTH,
     MAX_BODY_LENGTH,
     FIN_LENGTH,
+    PIN_MIN_LENGTH,
+    PIN_MAX_LENGTH,
     BAKU_TZ,
     MAX_DAILY_SUBMISSIONS,
     MAX_MONTHLY_SUBMISSIONS,
@@ -131,7 +133,9 @@ class FormType(str, Enum):
 class States(Enum):
     FULLNAME = auto()
     PHONE = auto()
+    ID_TYPE = auto()  # Şəxsiyyət vəsiqəsi vs DYİ seçimi
     FIN = auto()
+    PIN = auto()  # DYİ üçün PIN (5-6 simvol)
     ID_PHOTO = auto()
     FORM_TYPE = auto()
     SUBJECT = auto()
@@ -145,26 +149,34 @@ class States(Enum):
 class ApplicationData:
     fullname: Optional[str] = None
     phone: Optional[str] = None
-    fin: Optional[str] = None
+    id_type: Optional[str] = None  # "ID" (Şəxsiyyət Vəsiqəsi) və ya "DYI" (Daimi yaşayış icazəsi)
+    code: Optional[str] = None  # FIN (7 simvol) və ya PIN (5-6 simvol)
+    fin: Optional[str] = None  # Uyğunluq üçün (fin = code)
     id_photo_file_id: Optional[str] = None
     form_type: Optional[FormType] = None
     subject: Optional[str] = None
     body: Optional[str] = None
     timestamp: Optional[datetime] = None
+    username: Optional[str] = None  # Telegram username
+    user_telegram_id: Optional[int] = None  # Telegram user ID
 
     def summary_text(self) -> str:
-        # Tarix qısa formatda və sonunda
+        # ID növü etiketini dinamik göstər
+        id_label = "FİN" if self.id_type == "ID" else "PİN"
+        code_display = f"{id_label}: {self.code}" if self.code else ""
+        
+        # Tarix formatı
         time_str = ""
         if self.timestamp:
-            time_str = f"⏰ {self.timestamp.strftime('%d.%m.%y %H:%M:%S')}\n"
+            time_str = f"⏰Müraciət tarixi: {self.timestamp.strftime(' %d.%m.%Y  (%H:%M:%S)')}"
+        
         return (
-            "📋 Müraciət xülasəsi:\n"
-            # Ad xətti sadələşdirildi (uzun başlıq silindi)
             f"👤 {self.fullname}\n"
             f"📱 Mobil nömrə: {self.phone}\n"
-            f"🆔 FIN: {self.fin}\n"
-            # Form növü gizlədilib (istifadəçi və qrup mesajlarında göstərilmir)
-            f"✍️ Müraciət mətni: {self.body}\n\n"
+            f"#️⃣ {code_display}\n"
+            f"✍️ Müraciət mətni: {self.body}\n"
+            f"\n📧 @{self.username}\n"
+            f"🆔: {self.user_telegram_id}\n"
             f"{time_str}"
         )
 
@@ -182,21 +194,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     current_baku = datetime.now(BAKU_TZ)
     is_admin = uid in ADMIN_USER_IDS if uid else False
-    if not is_admin:
-        if current_baku.weekday() in (5, 6):  # Şənbə və ya bazar
-            await msg.reply_text(
-                MESSAGES["weekend_notice"].format(start="09:00", end="18:00"),
-                reply_markup=ReplyKeyboardRemove(),
-            )
-            logger.info("Weekend block: müraciət yalnız iş günlərində qəbul olunur")
-            return ConversationHandler.END
-        if current_baku.hour < 9 or current_baku.hour >= 18:
-            await msg.reply_text(
-                MESSAGES["offhours_notice"].format(start="09:00", end="18:00"),
-                reply_markup=ReplyKeyboardRemove(),
-            )
-            logger.info("Outside working hours block: müraciət yalnız 09:00-18:00 qəbul olunur")
-            return ConversationHandler.END
+    logger.info(f"Admin check: is_admin={is_admin}")
 
     # Qara siyahı yoxlaması
     if uid and DB_ENABLED:
@@ -218,45 +216,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     return ConversationHandler.END
         except Exception as e:
             logger.error(f"Blacklist yoxlaması xətası: {e}")
-    
-    # Rate limiting yoxlaması (spam qarşısı) — adminlər azaddır
-    # Admin istifadəçiləri üçün limit tətbiq olunmur
-    if DB_ENABLED and uid and uid not in ADMIN_USER_IDS:
-        try:
-            recent_count = 0
-            if USE_SQLITE:
-                from db_sqlite import count_user_recent_applications_sqlite
-                recent_count = count_user_recent_applications_sqlite(uid, hours=24)  # type: ignore[possibly-unbound]
-            else:
-                from db_operations import count_user_recent_applications
-                recent_count = count_user_recent_applications(uid, hours=24)  # type: ignore[possibly-unbound]
-
-            if recent_count >= MAX_DAILY_SUBMISSIONS:
-                await msg.reply_text(
-                    f"⚠️ Siz artıq son 24 saatda {MAX_DAILY_SUBMISSIONS} müraciət göndərmisiniz.\n"
-                    "Zəhmət olmasa bir az gözləyin və ya əvvəlki müraciətlərinizin cavabını gözləyin.",
-                    reply_markup=ReplyKeyboardRemove(),
-                )
-                logger.warning(f"Rate limit: user_id={uid} artıq {recent_count} müraciət göndərib")
-                return ConversationHandler.END
-            monthly_count = 0
-            if USE_SQLITE:
-                from db_sqlite import count_user_recent_applications_sqlite
-                monthly_count = count_user_recent_applications_sqlite(uid, hours=24 * 30)  # type: ignore[possibly-unbound]
-            else:
-                from db_operations import count_user_recent_applications
-                monthly_count = count_user_recent_applications(uid, hours=24 * 30)  # type: ignore[possibly-unbound]
-
-            if monthly_count >= MAX_MONTHLY_SUBMISSIONS:
-                await msg.reply_text(
-                    MESSAGES["monthly_limit_exceeded"].format(limit=MAX_MONTHLY_SUBMISSIONS),
-                    reply_markup=ReplyKeyboardRemove(),
-                )
-                logger.warning(f"Monthly rate limit: user_id={uid} already sent {monthly_count} in 30 days")
-                return ConversationHandler.END
-        except Exception as e:
-            logger.error(f"Rate limiting yoxlaması xətası: {e}")
-            # Xəta olarsa, istifadəçini bloklamırıq
     
     # Deep link parametrləri: reply_<id> və reject_<id>
     try:
@@ -367,7 +326,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         MESSAGES["welcome"],
         reply_markup=ReplyKeyboardRemove(),
     )
-    _ud(context).setdefault("app", ApplicationData())
+    app_data = ApplicationData()
+    app_data.username = update.effective_user.username if update.effective_user else None
+    app_data.user_telegram_id = update.effective_user.id if update.effective_user else None
+    app_data.timestamp = datetime.now(BAKU_TZ)
+    _ud(context)["app"] = app_data
     return States.FULLNAME
 
 async def collect_fullname(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -399,8 +362,36 @@ async def collect_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_text(MESSAGES["phone_error"])
         return States.PHONE
     _ud(context).setdefault("app", ApplicationData()).phone = phone
-    await msg.reply_text(MESSAGES["fin_prompt"])
-    return States.FIN
+    # ID_TYPE seçiminə keç (Şəxsiyyət Vəsiqəsi vs DYİ)
+    buttons = [
+        [InlineKeyboardButton(" 📄 Şəxsiyyət Vəsiqəsi", callback_data="id_type_id")],
+        [InlineKeyboardButton("📄 Daimi yaşayış icazəsi (DYİ)", callback_data="id_type_dyi")],
+    ]
+    if msg:
+        await msg.reply_text(
+            MESSAGES["id_type_prompt"],
+            reply_markup=InlineKeyboardMarkup(buttons),
+        )
+    return States.ID_TYPE
+
+async def choose_id_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """ID_TYPE seçimini işlə - Şəxsiyyət Vəsiqəsi vs DYİ"""
+    query = update.callback_query
+    if not query:
+        logger.warning("choose_id_type: callback_query yoxdur")
+        return ConversationHandler.END
+    await query.answer()
+    app = _ud(context).setdefault("app", ApplicationData())
+    
+    if query.data == "id_type_id":
+        app.id_type = "ID"
+        await query.edit_message_text(MESSAGES["fin_prompt"])
+        return States.FIN
+    elif query.data == "id_type_dyi":
+        app.id_type = "DYI"
+        await query.edit_message_text(MESSAGES["pin_prompt"])
+        return States.PIN
+    return ConversationHandler.END
 
 async def collect_fin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
@@ -410,7 +401,23 @@ async def collect_fin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(fin) != FIN_LENGTH or not fin.isalnum():
         await msg.reply_text(MESSAGES["fin_error"])
         return States.FIN
-    _ud(context).setdefault("app", ApplicationData()).fin = fin
+    app = _ud(context).setdefault("app", ApplicationData())
+    app.code = fin
+    app.fin = fin  # Uyğunluq üçün
+    await msg.reply_text(MESSAGES["id_photo_prompt"])
+    return States.ID_PHOTO
+
+async def collect_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.effective_message
+    if not msg or not msg.text:
+        return States.PIN
+    pin = msg.text.strip().upper()
+    if len(pin) < PIN_MIN_LENGTH or len(pin) > PIN_MAX_LENGTH or not pin.isalnum():
+        await msg.reply_text(MESSAGES["pin_error"])
+        return States.PIN
+    app = _ud(context).setdefault("app", ApplicationData())
+    app.code = pin
+    app.fin = pin  # Uyğunluq üçün (DB-dən geri uyğunluq)
     await msg.reply_text(MESSAGES["id_photo_prompt"])
     return States.ID_PHOTO
 
@@ -538,7 +545,7 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     created_at=app.timestamp,  # type: ignore[arg-type]
                 )
                 logger.info(f"✅ SQLite-a yazıldı: ID={db_app['id']}")
-                caption_prefix = f"🆔 SQLite ID: {db_app['id']}\n"
+                caption_prefix = f"Sıra №: {db_app['id']}\n"
                 db_id = db_app["id"]
             else:
                 # PostgreSQL
@@ -553,7 +560,7 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     created_at=app.timestamp,  # type: ignore[arg-type]
                 )
                 logger.info(f"✅ PostgreSQL-ə yazıldı: ID={db_app.id}")
-                caption_prefix = f"🆔 DB ID: {db_app.id}\n"
+                caption_prefix = f"Sıra №: {db_app.id}\n"
                 db_id = db_app.id  # type: ignore[assignment]
         except Exception as e:
             logger.error(f"❌ DB error: {e}")
@@ -567,16 +574,15 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 10+ gün əvvəl yaradılıbsa, "Vaxtı keçir"
     days_old = (datetime.now(BAKU_TZ) - app.timestamp).days if app.timestamp else 0
     if days_old >= 10:
-        status_line = "🔴 Status: Vaxtı keçir\n\n"
+        status_line = "\n🔴 Status: Vaxtı keçir"
     else:
-        status_line = "🟡 Status: Gözləyir\n\n"
+        status_line = "\n🟡 Status: Gözləyir"
     
     caption = (
         caption_prefix +
+        app.summary_text() +
         status_line +
-        "🆕 Yeni müraciət\n\n" + app.summary_text() + 
-        f"\n👤 Göndərən: @{query.from_user.username or 'istifadəçi adı yoxdur'}\n"
-        f"🆔 User ID: {query.from_user.id}"
+        "\n\n"
     )
 
     # İcraçı qrupuna mesaj + foto (yalnız EXECUTOR_CHAT_ID düzgün olduqda)
@@ -631,9 +637,8 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         logger.warning("EXECUTOR_CHAT_ID təyin edilməyib; icraçılara göndərilmədi")
 
-    # Vatandaşa təsdiq DM
-    if query.message and query.message.chat:
-        await context.bot.send_message(chat_id=query.message.chat.id, text=MESSAGES["success"])
+    # (Previously sent a separate success DM here.) Now confirmation text
+    # is shown via the edited message (`confirm_sent`) so no extra DM is needed.
     return ConversationHandler.END
 
 # ================== İcraçı qrup cavab axını ==================
@@ -887,7 +892,7 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
                 # Status sətirini dəyiş: 🟡 Gözləyir → 🟢 İcra edildi
                 new_content = re.sub(
                     r"🟡 Status: Gözləyir",
-                    f"🟢 Status: İcra edildi (@{from_user.username or from_user.id})",
+                    f"🟢 Status: İcra edildi\nİcraçı -@{from_user.username or from_user.id}",
                     orig_content
                 )
                 # Cavab mətni əlavə et (caption limitlərini nəzərə al)
@@ -1095,7 +1100,7 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
                 # Status sətirini dəyiş: 🟡 Gözləyir → ⚫ İmtina
                 new_content = re.sub(
                     r"🟡 Status: Gözləyir",
-                    f"⚫ Status: İmtina (@{from_user.username or from_user.id})",
+                    f"⚫ Status: İmtina\nİcraçı -@{from_user.username or from_user.id}",
                     orig_content
                 )
                 if has_photo:
@@ -1431,7 +1436,9 @@ def build_app() -> Application:
         states={
             States.FULLNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_fullname)],
             States.PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_phone)],
+            States.ID_TYPE: [CallbackQueryHandler(choose_id_type)],
             States.FIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_fin)],
+            States.PIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_pin)],
             States.ID_PHOTO: [MessageHandler(filters.PHOTO, collect_id_photo)],
             States.FORM_TYPE: [CallbackQueryHandler(choose_form_type)],
             States.SUBJECT: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_subject)],
