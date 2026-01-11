@@ -160,7 +160,7 @@ class ApplicationData:
     username: Optional[str] = None  # Telegram username
     user_telegram_id: Optional[int] = None  # Telegram user ID
 
-    def summary_text(self) -> str:
+    def summary_text(self, include_time: bool = True) -> str:
         # ID növü etiketini dinamik göstər
         id_label = "FİN" if self.id_type == "ID" else "PİN"
         code_display = f"{id_label}: {self.code}" if self.code else ""
@@ -168,7 +168,10 @@ class ApplicationData:
         # Tarix formatı
         time_str = ""
         if self.timestamp:
-            time_str = f"⏰Müraciət tarixi: {self.timestamp.strftime(' %d.%m.%Y  (%H:%M:%S)')}"
+            if include_time:
+                time_str = f"⏰Müraciət tarixi: {self.timestamp.strftime(' %d.%m.%Y  (%H:%M:%S)')}"
+            else:
+                time_str = f"⏰Müraciət tarixi: {self.timestamp.strftime('%d.%m.%Y')}"
         
         return (
             f"👤 {self.fullname}\n"
@@ -580,7 +583,7 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     caption = (
         caption_prefix +
-        app.summary_text() +
+        app.summary_text(include_time=False) +
         status_line +
         "\n\n"
     )
