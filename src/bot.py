@@ -517,7 +517,16 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Zəhmət olmasa müraciət mətnini yenidən yazın:")
         return States.BODY
     # confirm
-    await query.edit_message_text(MESSAGES["confirm_sent"])
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    keyboard = [
+        [InlineKeyboardButton("📝 Yeni müraciət göndər", callback_data="start_new")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(
+        MESSAGES["confirm_sent"],
+        reply_markup=reply_markup,
+        parse_mode="HTML"
+    )
 
     # Database-ə yaz (PostgreSQL və ya SQLite)
     if DB_ENABLED:
@@ -643,6 +652,56 @@ async def confirm_or_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # (Previously sent a separate success DM here.) Now confirmation text
     # is shown via the edited message (`confirm_sent`) so no extra DM is needed.
     return ConversationHandler.END
+
+# ================== Yeni müraciət düymə callback ==================
+async def start_new_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Təkrar müraciət düyməsinə basıldıqda yeni anket axını başlat"""
+    from config import ADMIN_USER_IDS
+    
+    query = update.callback_query
+    user = update.effective_user
+    
+    if not query or not user:
+        return ConversationHandler.END
+    
+    await query.answer()
+    
+    # Qara siyahı yoxlaması
+    uid = user.id
+    if uid and DB_ENABLED:
+        try:
+            if uid not in ADMIN_USER_IDS:
+                blacklisted = False
+                if USE_SQLITE:
+                    from db_sqlite import is_user_blacklisted_sqlite
+                    blacklisted = is_user_blacklisted_sqlite(uid)  # type: ignore[possibly-unbound]
+                else:
+                    from db_operations import is_user_blacklisted
+                    blacklisted = is_user_blacklisted(uid)  # type: ignore[possibly-unbound]
+                if blacklisted:
+                    await query.edit_message_text(
+                        "⚠️ Müraciətləriniz müvəqqəti qəbul edilmir. Xahiş edirik daha sonra yenidən yoxlayın."
+                    )
+                    return ConversationHandler.END
+        except Exception as e:
+            logger.error(f"Blacklist yoxlaması xətası: {e}")
+    
+    # user_data-nı sıfırla (yeni müraciət üçün)
+    if context.user_data:
+        context.user_data.clear()
+    
+    # Mesajı sil və yeni anket axınını başlat
+    try:
+        await query.edit_message_text(MESSAGES["welcome"], reply_markup=None)
+    except Exception as e:
+        logger.warning(f"Message edit xətası: {e}")
+        try:
+            await query.message.reply_text(MESSAGES["welcome"])
+        except Exception as e2:
+            logger.error(f"Reply text xətası: {e2}")
+    
+    # Anket başlasın: Name step-ə keç
+    return States.FULLNAME
 
 # ================== İcraçı qrup cavab axını ==================
 async def exec_reply_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1435,7 +1494,10 @@ def build_app() -> Application:
     if not BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN təyin edilməyib. .env faylını yoxlayın.")
     conv = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[
+            CommandHandler("start", start),
+            CallbackQueryHandler(start_new_callback, pattern=r"^start_new$")
+        ],
         states={
             States.FULLNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_fullname)],
             States.PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_phone)],

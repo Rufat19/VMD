@@ -109,9 +109,10 @@ MESSAGES = {
     "body_prompt": "✍️ Müraciətinizi aydın və qısa şəkildə yazın (max 350 simvol)",
     "body_error": "Mətn çox qısa (min 10) və ya çox uzundur (max 350). Xahiş edirik yenidən göndərin.",
     "confirm_sent": (
-        "✅ Müraciətiniz qeydə alındı və icraçılara yönləndirildi. \n"
-        "Müraciətinizin cavabı verildikdə siz bununla bağlı bildiriş alacaqsınız. \n"
-        "Təkrar müraciət göndərmək üçün >> /start << düyməsinə toxunun."
+        "✅ <b>Müraciətiniz uğurla qeydə alındı</b>\n\n"
+        "Sizin müraciətiniz icraçı qrupuna yönləndirilmişdir və ən qısa zamanda cavablandırılacaqdır. "
+        "Cavab verildikdə, siz birbaşa bu kanalda bildiriş alacaqsınız.\n\n"
+        "<i>Zəhmət olmasa gözləyin. Cavab müddəti 5-7 iş günü arasında ola bilər.</i>"
     ),
     "success": "",
     "cancelled": "❌ Müraciət ləğv edildi",
