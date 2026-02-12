@@ -935,7 +935,8 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
             if not app:
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
-            await context.bot.send_message(chat_id=app["user_telegram_id"], text=f"✅ Müraciətinizə cavab:\n\n{text}")
+            kb = InlineKeyboardMarkup([[InlineKeyboardButton("Yeni müraciət göndər", callback_data="start_new")]])
+            await context.bot.send_message(chat_id=app["user_telegram_id"], text=f"✅ Müraciətinizə cavab:\n\n{text}", reply_markup=kb)
             update_application_status_sqlite(app_id, "completed", notes=f"Replied by @{from_user.username or from_user.id}")
         else:
             from db_operations import get_application_by_id, update_application_status, ApplicationStatus
@@ -943,7 +944,8 @@ async def exec_collect_reply_text(update: Update, context: ContextTypes.DEFAULT_
             if not app:
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
-            await context.bot.send_message(chat_id=app.user_telegram_id, text=f"✅ Müraciətinizə cavab:\n\n{text}")  # type: ignore[arg-type]
+            kb = InlineKeyboardMarkup([[InlineKeyboardButton("Yeni müraciət göndər", callback_data="start_new")]])
+            await context.bot.send_message(chat_id=app.user_telegram_id, text=f"✅ Müraciətinizə cavab:\n\n{text}", reply_markup=kb)  # type: ignore[arg-type]
             update_application_status(app_id, ApplicationStatus.COMPLETED, notes=f"Replied by @{from_user.username or from_user.id}", reply_text=text)
         
         # Qrup mesajında statusu yenilə və cavabı görünən et
@@ -1079,7 +1081,8 @@ async def exec_collect_edit_reply_text(update: Update, context: ContextTypes.DEF
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
             # Vətəndaşa yenilənmiş cavab göndər
-            await context.bot.send_message(chat_id=app["user_telegram_id"], text=f"♻️ Yenilənmiş cavab:\n\n{new_text}")
+            kb = InlineKeyboardMarkup([[InlineKeyboardButton("Yeni müraciət göndər", callback_data="start_new")]])
+            await context.bot.send_message(chat_id=app["user_telegram_id"], text=f"♻️ Yenilənmiş cavab:\n\n{new_text}", reply_markup=kb)
             update_application_status_sqlite(app_id, "completed", notes=f"Edited by @{from_user.username or from_user.id}")
         else:
             from db_operations import get_application_by_id, update_application_status, ApplicationStatus
@@ -1087,7 +1090,8 @@ async def exec_collect_edit_reply_text(update: Update, context: ContextTypes.DEF
             if not app:
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
-            await context.bot.send_message(chat_id=app.user_telegram_id, text=f"♻️ Yenilənmiş cavab:\n\n{new_text}")  # type: ignore[arg-type]
+            kb = InlineKeyboardMarkup([[InlineKeyboardButton("Yeni müraciət göndər", callback_data="start_new")]])
+            await context.bot.send_message(chat_id=app.user_telegram_id, text=f"♻️ Yenilənmiş cavab:\n\n{new_text}", reply_markup=kb)  # type: ignore[arg-type]
             update_application_status(app_id, ApplicationStatus.COMPLETED, notes=f"Edited by @{from_user.username or from_user.id}", reply_text=new_text)
 
         # Qrup mesajında cavab mətni hissəsini yenilə
@@ -1143,7 +1147,8 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
             if not app:
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
-            await context.bot.send_message(chat_id=app["user_telegram_id"], text=f"❌ Müraciət rədd edildi. Səbəb:\n\n{reason}")
+            kb = InlineKeyboardMarkup([[InlineKeyboardButton("Yeni müraciət göndər", callback_data="start_new")]])
+            await context.bot.send_message(chat_id=app["user_telegram_id"], text=f"❌ Müraciət rədd edildi. Səbəb:\n\n{reason}", reply_markup=kb)
             update_application_status_sqlite(app_id, "rejected", notes=f"Rejected by @{from_user.username or from_user.id}: {reason}")
         else:
             from db_operations import get_application_by_id, update_application_status, ApplicationStatus
@@ -1151,7 +1156,8 @@ async def exec_collect_reject_reason(update: Update, context: ContextTypes.DEFAU
             if not app:
                 await msg.reply_text("❌ Müraciət tapılmadı")
                 return ConversationHandler.END
-            await context.bot.send_message(chat_id=app.user_telegram_id, text=f"❌ Müraciət rədd edildi. Səbəb:\n\n{reason}")  # type: ignore[arg-type]
+            kb = InlineKeyboardMarkup([[InlineKeyboardButton("Yeni müraciət göndər", callback_data="start_new")]])
+            await context.bot.send_message(chat_id=app.user_telegram_id, text=f"❌ Müraciət rədd edildi. Səbəb:\n\n{reason}", reply_markup=kb)  # type: ignore[arg-type]
             update_application_status(app_id, ApplicationStatus.REJECTED, notes=f"Rejected by @{from_user.username or from_user.id}: {reason}", reply_text=reason)
         
         # Qrup mesajında statusu yenilə (cavab mesajı göstərmə, sadəcə status dəyiş)
